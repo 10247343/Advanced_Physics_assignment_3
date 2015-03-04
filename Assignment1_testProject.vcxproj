@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\src\body.cpp" />
+    <ClCompile Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\src\collide_coarse.cpp" />
+    <ClCompile Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\src\collide_fine.cpp" />
+    <ClCompile Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\src\contacts.cpp" />
+    <ClCompile Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\src\core.cpp" />
+    <ClCompile Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\src\fgen.cpp" />
+    <ClCompile Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\src\joints.cpp" />
+    <ClCompile Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\src\particle.cpp" />
+    <ClCompile Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\src\pcontacts.cpp" />
+    <ClCompile Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\src\pfgen.cpp" />
+    <ClCompile Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\src\plinks.cpp" />
+    <ClCompile Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\src\pworld.cpp" />
+    <ClCompile Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\src\random.cpp" />
+    <ClCompile Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\src\world.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\include\cyclone\body.h" />
+    <ClInclude Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\include\cyclone\collide_coarse.h" />
+    <ClInclude Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\include\cyclone\collide_fine.h" />
+    <ClInclude Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\include\cyclone\contacts.h" />
+    <ClInclude Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\include\cyclone\core.h" />
+    <ClInclude Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\include\cyclone\cyclone.h" />
+    <ClInclude Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\include\cyclone\fgen.h" />
+    <ClInclude Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\include\cyclone\joints.h" />
+    <ClInclude Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\include\cyclone\particle.h" />
+    <ClInclude Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\include\cyclone\pcontacts.h" />
+    <ClInclude Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\include\cyclone\pfgen.h" />
+    <ClInclude Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\include\cyclone\plinks.h" />
+    <ClInclude Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\include\cyclone\precision.h" />
+    <ClInclude Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\include\cyclone\pworld.h" />
+    <ClInclude Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\include\cyclone\random.h" />
+    <ClInclude Include="..\..\..\..\..\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\include\cyclone\world.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{19B85BFC-806D-4A1D-8EAB-E7DFED9A8BE9}</ProjectGuid>
+    <RootNamespace>Assignment1_testProject</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Users\Thomas\Documents\HBO\jaar_4\Advanced_Physics\cyclone-physics-master\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Users\Thomas\Documents\HBO\jaar 4\Advanced Physics\Assignment1\cyclone-physics-master\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
