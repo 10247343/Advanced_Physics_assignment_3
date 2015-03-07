@@ -24,7 +24,7 @@
     <ClCompile Include="..\utils\timing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ballistic.cpp">
+    <ClCompile Include="..\..\cyclone-physics\src\demos\bridge\bridge.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="HammockDemo.cpp">

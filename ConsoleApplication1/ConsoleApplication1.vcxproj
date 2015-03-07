@@ -79,6 +79,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\cyclone-physics\src\demos\bridge\bridge.cpp" />
     <ClCompile Include="..\utils\app.cpp" />
     <ClCompile Include="..\utils\main.cpp" />
     <ClCompile Include="..\utils\timing.cpp" />
