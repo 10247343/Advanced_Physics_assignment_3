@@ -27,6 +27,9 @@
     <ClCompile Include="ballistic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="HammockDemo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\utils\app.h">
@@ -36,6 +39,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\utils\timing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HammockDemo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

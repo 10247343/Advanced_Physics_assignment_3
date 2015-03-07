@@ -83,11 +83,13 @@
     <ClCompile Include="..\utils\main.cpp" />
     <ClCompile Include="..\utils\timing.cpp" />
     <ClCompile Include="ballistic.cpp" />
+    <ClCompile Include="HammockDemo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\utils\app.h" />
     <ClInclude Include="..\utils\ogl_headers.h" />
     <ClInclude Include="..\utils\timing.h" />
+    <ClInclude Include="HammockDemo.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
