@@ -1,6 +1,8 @@
 #ifndef HAMMOCK_INCLUDED
 #define HAMMOCK_INCLUDED
 
+#define MASSOBJECT_MASS 20
+
 #include <cyclone/cyclone.h>
 
 #include "../utils/app.h"
@@ -30,30 +32,34 @@ struct Shape
 {
 	/** Gets the center coordinate of the line between vector to and from. */
 	cyclone::Vector3 GetMid(const cyclone::Vector3& from, const cyclone::Vector3& to) const;
-	/** Gets the cross lines from this shape. Needs shape specific implementation. */
+	/** Gets the cross lines from this shape. Needs shape specific implementation. 
+	These lines will form a plane which is used for calculating the position of the mass object. */
 	virtual Line* GetCrossLines() const = 0;
+	virtual const int FillArrayWithParticles(cyclone::Particle*) const = 0;
 };
 
 /** Rect implementation of Shape. */
 struct Rect : public Shape
 {
-	cyclone::Vector3 p0;
-	cyclone::Vector3 p1;
-	cyclone::Vector3 p2;
-	cyclone::Vector3 p3;
+	cyclone::Particle* p0;
+	cyclone::Particle* p1;
+	cyclone::Particle* p2;
+	cyclone::Particle* p3;
 
 	/** Returns the lines parallel to p1-p0 and p2-p1. */
 	Line* GetCrossLines() const;
+	virtual const int FillArrayWithParticles(cyclone::Particle*) const;
 };
  /** Triangle implementation of Shape. */
 struct Triangle : public Shape
 {
-	cyclone::Vector3 p0;
-	cyclone::Vector3 p1;
-	cyclone::Vector3 p2;
+	cyclone::Particle* p0;
+	cyclone::Particle* p1;
+	cyclone::Particle* p2;
 
 	/** Returns line p1-p0 and tline p2-(GetMid(p0,p1)). */
 	virtual Line* GetCrossLines() const;
+	virtual const int FillArrayWithParticles(cyclone::Particle*) const;
 };
 
 class HammockDemo : public Application
@@ -80,6 +86,7 @@ public:
 	virtual void display();
 	/** Calculates the mass object its position on the hammock. */
 	void SetMassPosition(const Shape&);
+	void AddMassToParticlesIn(const Shape&);
 
 private:
 	cyclone::Vector3 massRelativePos;

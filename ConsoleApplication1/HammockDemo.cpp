@@ -23,8 +23,8 @@ cyclone::Vector3 Shape::GetMid(const cyclone::Vector3& from, const cyclone::Vect
 Line* Rect::GetCrossLines() const
 {
 	Line* toReturn = new Line[2];
-	toReturn[0] = Line(GetMid(p0, p3), GetMid(p1, p2));
-	toReturn[1] = Line(GetMid(p0, p1), GetMid(p2, p3));
+	toReturn[0] = Line(GetMid(p0->getPosition(), p3->getPosition()), GetMid(p1->getPosition(), p2->getPosition()));
+	toReturn[1] = Line(GetMid(p0->getPosition(), p1->getPosition()), GetMid(p2->getPosition(), p3->getPosition()));
 
 	return toReturn;
 }
@@ -32,8 +32,8 @@ Line* Rect::GetCrossLines() const
 Line* Triangle::GetCrossLines() const
 {
 	Line* toReturn = new Line[2];
-	toReturn[0] = Line(p0, p1);
-	toReturn[1] = Line(GetMid(p0, p1), p2);
+	toReturn[0] = Line(p0->getPosition(), p1->getPosition());
+	toReturn[1] = Line(GetMid(p0->getPosition(), p1->getPosition()), p2->getPosition());
 
 	return toReturn;
 }
@@ -87,6 +87,29 @@ void HammockDemo::createHammock()
 		supports[i].restitution = 0.8f;
 		//world.getContactGenerators().push_back(&supports[i]);
 	}
+}
+
+const int Rect::FillArrayWithParticles(cyclone::Particle* array) const
+{
+	//Fill the given array with the particle values.
+	*array = *p0;
+	*(++array) = *p1;
+	*(++array) = *p2;
+	*(++array) = *p3;
+
+	//return the length of the array.
+	return 4;
+}
+
+const int Triangle::FillArrayWithParticles(cyclone::Particle* array) const
+{
+	//Fill the given array with the particle values.
+	*array = *p0;
+	*(++array) = *p1;
+	*(++array) = *p2;
+
+	//return the length of the array.
+	return 3;
 }
 
 /** retrun demo title */
@@ -186,4 +209,81 @@ void HammockDemo::SetMassPosition(const Shape& s)
 
 	//Lastly clean up the mess we made.
 	delete[] lines;
+}
+
+void HammockDemo::AddMassToParticlesIn(const Shape& s)
+{
+	//Get the paricles in an array and the length of the array.
+	cyclone::Particle* particleArr = new cyclone::Particle[4];
+	int length = s.FillArrayWithParticles(particleArr);
+
+	//Get all the positions on the corrosponding indexes of the particle array.
+	cyclone::Vector3* posArr = new cyclone::Vector3[length];
+
+	//Some index variables.
+	cyclone::Particle* parIndex = particleArr;
+	cyclone::Vector3* posIndex = posArr;
+
+	for (int i = 0; i < length; i++)
+	{
+		*posIndex = parIndex->getPosition();
+		posIndex++; parIndex++; //Increment pointers.
+	}
+
+	//Reset the index variables.
+	parIndex = particleArr;
+	posIndex = posArr;
+
+	//Safe check, avoid divide by zero by checking if mass object is standing on one 
+	//of the particles. If so, apply all mass on that particle and exit member function.
+	for (int i = 0; i < length; i++)
+	{
+		if (*posIndex == massPos)
+		{
+			//Give the particle all the mass.
+			parIndex->setMass(/*PARTICLE_MASS + */MASSOBJECT_MASS);
+
+			//Clean up and exit this member function.
+			delete[] particleArr;
+			delete[] posArr;
+			return;
+		}
+		posIndex++; parIndex++; //Increment pointers.
+	}
+
+	//Reset the index variables.
+	parIndex = particleArr;
+	posIndex = posArr;
+
+	//Now calculate the total magnitude squared to each particle.
+	//And to prevent doing this again, save all the values in an array.
+	cyclone::real* magnitudeArr = new cyclone::real[length];
+	cyclone::real* magnitudeIndex = magnitudeArr; //Index variable.
+	cyclone::real totalMagnitude(0);
+
+	for (int i = 0; i < length; i++)
+	{
+		*magnitudeIndex = (*posIndex - massPos).squareMagnitude();
+		totalMagnitude += *magnitudeIndex;
+
+		magnitudeIndex++; posIndex++; //Increment pointers.
+	}
+
+	//Reset the index variables.
+	magnitudeIndex = magnitudeArr;
+	posIndex = posArr;
+
+	//Loop through all the particles and give them the necessary mass.
+	for (int i = 0; i < length; i++)
+	{
+		//Add the aditional mass by magnitude/totalmagnitude * MASSOBJECT_MASS.
+		parIndex->setMass(/*PARTICLE_MASS + */*magnitudeIndex * MASSOBJECT_MASS / totalMagnitude);
+
+		posIndex++; parIndex++; magnitudeIndex++; //Increment pointers.
+	}
+
+	//Cleanup the mess.
+	delete[] particleArr;
+	delete[] posArr;
+	delete[] magnitudeArr;
 }
