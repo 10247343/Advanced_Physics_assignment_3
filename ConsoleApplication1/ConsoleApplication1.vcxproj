@@ -82,7 +82,6 @@
     <ClCompile Include="..\utils\app.cpp" />
     <ClCompile Include="..\utils\main.cpp" />
     <ClCompile Include="..\utils\timing.cpp" />
-    <ClCompile Include="ballistic.cpp" />
     <ClCompile Include="HammockDemo.cpp" />
   </ItemGroup>
   <ItemGroup>

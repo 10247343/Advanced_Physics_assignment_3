@@ -13,6 +13,31 @@ HammockDemo::~HammockDemo()
 	if (supports) delete[] supports;
 }
 
+
+cyclone::Vector3 Shape::GetMid(const cyclone::Vector3& from, const cyclone::Vector3& to) const
+{
+	//Cast 0.5 to real for compatibility with cyclone.
+	return from + (to - from) * (cyclone::real)0.5;
+}
+
+Line* Rect::GetCrossLines() const
+{
+	Line* toReturn = new Line[2];
+	toReturn[0] = Line(GetMid(p0, p3), GetMid(p1, p2));
+	toReturn[1] = Line(GetMid(p0, p1), GetMid(p2, p3));
+
+	return toReturn;
+}
+
+Line* Triangle::GetCrossLines() const
+{
+	Line* toReturn = new Line[2];
+	toReturn[0] = Line(p0, p1);
+	toReturn[1] = Line(GetMid(p0, p1), p2);
+
+	return toReturn;
+}
+
 /** creating the hammock */
 void HammockDemo::createHammock()
 {
@@ -135,4 +160,30 @@ void HammockDemo::key(unsigned char key)
     {
     case '1': printf( "test string");//currentShotType = PISTOL; break;
     }
+}
+
+void HammockDemo::SetMassPosition(const Shape& s)
+{
+	//Create a cross with the lines Parallel to the rect's lines.
+	//These lines will form the plane we will use to place the mass.
+	Line* lines = s.GetCrossLines();
+
+	//Use one of the plane's points as a reference point fo calculate the offset.
+	cyclone::Vector3 referencePoint(lines->start);
+	cyclone::Vector3 xzOffset(massRelativePos - cyclone::Vector3(referencePoint.x, 0, referencePoint.z));
+
+	//Now project the offset on the plane.
+	//To do so we first need the plane its normal. Every line perpendicular to
+	//the normal will be on the plane.
+	cyclone::Vector3 planeNormal(lines->GetLine().vectorProduct((++lines)->GetLine()));
+	planeNormal.normalise();
+
+	//Now calculate projection line x on plane V with normal n using projection = x - (x * n)n
+	cyclone::Vector3 xyzOffset(xzOffset - planeNormal * (xzOffset * planeNormal));
+
+	//Now set the mass its position.
+	massPos = referencePoint + xyzOffset;
+
+	//Lastly clean up the mess we made.
+	delete[] lines;
 }
