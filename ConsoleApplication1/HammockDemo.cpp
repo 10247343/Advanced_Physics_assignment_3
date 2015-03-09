@@ -1,23 +1,18 @@
 #include "HammockDemo.h"
 
-HammockDemo::HammockDemo()
-{
-	createHammock();
-}
-
-/** HammockDemo destructor function, clearing all particle arrays */
-HammockDemo::~HammockDemo()
-{
-	if (particles) delete[] particles;
-	if (cables) delete[] cables;
-	if (supports) delete[] supports;
-}
-
-
 cyclone::Vector3 Shape::GetMid(const cyclone::Vector3& from, const cyclone::Vector3& to) const
 {
 	//Cast 0.5 to real for compatibility with cyclone.
 	return from + (to - from) * (cyclone::real)0.5;
+}
+
+bool Rect::IntersectsWithPoint(const cyclone::Vector3& v)
+{
+	//Create 2 triangles.
+	Triangle t1(p0, p1, p3);
+	Triangle t2(p1, p2, p3);
+
+	return t1.IntersectsWithPoint(v) || t2.IntersectsWithPoint(v);
 }
 
 Line* Rect::GetCrossLines() const
@@ -29,6 +24,23 @@ Line* Rect::GetCrossLines() const
 	return toReturn;
 }
 
+const int Rect::FillArrayWithParticles(cyclone::Particle* array) const
+{
+	//Fill the given array with the particle values.
+	*array = *p0;
+	*(++array) = *p1;
+	*(++array) = *p2;
+	*(++array) = *p3;
+
+	//return the length of the array.
+	return 4;
+}
+
+bool Triangle::IntersectsWithPoint(const cyclone::Vector3& v)
+{
+	return false;
+}
+
 Line* Triangle::GetCrossLines() const
 {
 	Line* toReturn = new Line[2];
@@ -36,6 +48,30 @@ Line* Triangle::GetCrossLines() const
 	toReturn[1] = Line(GetMid(p0->getPosition(), p1->getPosition()), p2->getPosition());
 
 	return toReturn;
+}
+
+const int Triangle::FillArrayWithParticles(cyclone::Particle* array) const
+{
+	//Fill the given array with the particle values.
+	*array = *p0;
+	*(++array) = *p1;
+	*(++array) = *p2;
+
+	//return the length of the array.
+	return 3;
+}
+
+HammockDemo::HammockDemo()
+{
+	createHammock();
+}
+
+/** HammockDemo destructor function, clearing all particle arrays */
+HammockDemo::~HammockDemo()
+{
+	if (particles) delete[] particles;
+	if (cables) delete[] cables;
+	if (supports) delete[] supports;
 }
 
 /** creating the hammock */
@@ -54,6 +90,22 @@ void HammockDemo::createHammock()
 		particles[i].clearAccumulator();
 		particles[i].setMass(PARTICLE_MASS);
 	}
+
+	//Check if the number of particles is even.
+	//We only use the mass object if the number of particles is even.
+#ifdef NUMBER_OF_RECTS
+	//Now create the rects.
+	rects = new Rect[NUMBER_OF_RECTS];
+
+	for (int i = 0; i < NUMBER_OF_RECTS; i++)
+	{
+		int doubleI(i * 2);
+		rects[0] = Rect(*particles[doubleI++],
+			*particles[doubleI++],
+			*particles[doubleI++],
+			*particles[doubleI]);
+	}
+#endif
 
 	// placing cables between the particles to reprecent the hammock
 	cables = new cyclone::ParticleCable[CABLE_COUNT];
@@ -87,29 +139,6 @@ void HammockDemo::createHammock()
 		supports[i].restitution = 0.8f;
 		//world.getContactGenerators().push_back(&supports[i]);
 	}
-}
-
-const int Rect::FillArrayWithParticles(cyclone::Particle* array) const
-{
-	//Fill the given array with the particle values.
-	*array = *p0;
-	*(++array) = *p1;
-	*(++array) = *p2;
-	*(++array) = *p3;
-
-	//return the length of the array.
-	return 4;
-}
-
-const int Triangle::FillArrayWithParticles(cyclone::Particle* array) const
-{
-	//Fill the given array with the particle values.
-	*array = *p0;
-	*(++array) = *p1;
-	*(++array) = *p2;
-
-	//return the length of the array.
-	return 3;
 }
 
 /** retrun demo title */
@@ -241,7 +270,7 @@ void HammockDemo::AddMassToParticlesIn(const Shape& s)
 		if (*posIndex == massPos)
 		{
 			//Give the particle all the mass.
-			parIndex->setMass(/*PARTICLE_MASS + */MASSOBJECT_MASS);
+			parIndex->setMass(PARTICLE_MASS + MASSOBJECT_MASS);
 
 			//Clean up and exit this member function.
 			delete[] particleArr;
@@ -257,6 +286,8 @@ void HammockDemo::AddMassToParticlesIn(const Shape& s)
 
 	//Now calculate the total magnitude squared to each particle.
 	//And to prevent doing this again, save all the values in an array.
+	//We use squared instead of the actual magnitude to cause exponential differences in mass
+	//dividing instead of linear dividing.
 	cyclone::real* magnitudeArr = new cyclone::real[length];
 	cyclone::real* magnitudeIndex = magnitudeArr; //Index variable.
 	cyclone::real totalMagnitude(0);
@@ -277,7 +308,7 @@ void HammockDemo::AddMassToParticlesIn(const Shape& s)
 	for (int i = 0; i < length; i++)
 	{
 		//Add the aditional mass by magnitude/totalmagnitude * MASSOBJECT_MASS.
-		parIndex->setMass(/*PARTICLE_MASS + */*magnitudeIndex * MASSOBJECT_MASS / totalMagnitude);
+		parIndex->setMass(PARTICLE_MASS + *magnitudeIndex * MASSOBJECT_MASS / totalMagnitude);
 
 		posIndex++; parIndex++; magnitudeIndex++; //Increment pointers.
 	}
