@@ -6,13 +6,25 @@ cyclone::Vector3 Shape::GetMid(const cyclone::Vector3& from, const cyclone::Vect
 	return from + (to - from) * (cyclone::real)0.5;
 }
 
-bool Quadrilateral::IntersectsWithPoint(const cyclone::Vector3& v)
+Triangle* Quadrilateral::GetTriangles() const
 {
 	//Create 2 triangles.
-	Triangle t1(p0, p1, p3);
-	Triangle t2(p1, p2, p3);
-	
-	return t1.IntersectsWithPoint(v) || t2.IntersectsWithPoint(v);
+	Triangle* toReturn = new Triangle[2];
+	toReturn[0] = Triangle(p0, p1, p3);
+	toReturn[1] = Triangle(p1, p2, p3);
+
+	return toReturn;
+}
+
+bool Quadrilateral::IntersectsWithPoint(const cyclone::Vector3& v)
+{
+	bool toReturn;
+
+	Triangle* triangles = GetTriangles();
+	toReturn = triangles->IntersectsWithPoint(v) || (triangles + 1)->IntersectsWithPoint(v);
+	delete[] triangles;
+
+	return toReturn;
 }
 
 Line* Quadrilateral::GetCrossLines() const
@@ -36,6 +48,11 @@ const int Quadrilateral::FillArrayWithParticles(cyclone::Particle* array) const
 	return 4;
 }
 
+cyclone::real Triangle::GetLambda(const cyclone::Vector3& triangleLine, const cyclone::Vector3& p_p0)
+{
+	return (triangleLine * p_p0) / (triangleLine * triangleLine);
+}
+
 bool Triangle::IntersectsWithPoint(const cyclone::Vector3& p)
 {
 	/** Equation: p = p0 + (p1 - p0) * t + (p2 - p0) * s
@@ -54,17 +71,17 @@ bool Triangle::IntersectsWithPoint(const cyclone::Vector3& p)
 	t, s and 1 - t - s are called the Barycentric coordinates.
 
 	We are using the xz position, so all the y values have to be 0. */
-	cyclone::Vector3 p_p0(p - p0->getPosition()); 
+	cyclone::Vector3 p_p0(cyclone::Vector3(p.x, 0, p.z) - p0->getPosition()); 
 	p_p0.y = 0;
 	cyclone::Vector3 p1_p0((p1->getPosition() - p0->getPosition()));
 	p1_p0.y = 0;
-	cyclone::real t((p1_p0 * p_p0) / (p1_p0 * p1_p0));
+	cyclone::real t(GetLambda(p1_p0, p_p0));
 	if (t < 0 || t > 1)
 		return false; //t is to high/low.
 
 	cyclone::Vector3 p2_p0((p2->getPosition() - p0->getPosition()));
 	p2_p0.y = 0;
-	cyclone::real s((p2_p0 * p_p0) / (p2_p0 * p2_p0));
+	cyclone::real s(GetLambda(p2_p0, p_p0));
 	if (s < 0 || s > 1)
 		return false; //s is to high/low.
 
@@ -316,30 +333,23 @@ void HammockDemo::key(unsigned char key)
     }
 }
 
-void HammockDemo::SetMassPosition(const Shape& s)
-{
-	//Create a cross with the lines Parallel to the Quadrilateral's lines.
-	//These lines will form the plane we will use to place the mass.
-	Line* lines = s.GetCrossLines();
+void HammockDemo::SetMassPosition(const Quadrilateral& quadrilateral)
+{	
+	//Get the colliding traingle.
+	Triangle* triangles = quadrilateral.GetTriangles();
+	Triangle* target = triangles->IntersectsWithPoint(massRelativePos) ? triangles : (triangles + 1);
 
-	//Use one of the plane's points as a reference point fo calculate the offset.
-	cyclone::Vector3 referencePoint(lines->start);
-	cyclone::Vector3 xzOffset(massRelativePos - cyclone::Vector3(referencePoint.x, 0, referencePoint.z));
+	//Get the lambdas for the relative point (so y = 0)
+	cyclone::Vector3 tVec(target->p1->getPosition() - target->p0->getPosition()); //p1_p0
+	cyclone::real t(target->GetLambda(cyclone::Vector3(tVec.x, 0, tVec.z), massRelativePos));
+	cyclone::Vector3 sVec(target->p2->getPosition() - target->p0->getPosition()); //p2_p0
+	cyclone::real s(target->GetLambda(cyclone::Vector3(sVec.x, 0, sVec.z), massRelativePos));
 
-	//Now project the offset on the plane.
-	//To do so we first need the plane its normal. Every line perpendicular to
-	//the normal will be on the plane.
-	cyclone::Vector3 planeNormal(lines->GetLine().vectorProduct((++lines)->GetLine()));
-	planeNormal.normalise();
+	//Now calculate the point with p = p0 + p1_p0 * t + p2_p0 * s.
+	massPos = target->p0->getPosition() + tVec * t + sVec * s;
 
-	//Now calculate projection line x on plane V with normal n using projection = x - (x * n)n
-	cyclone::Vector3 xyzOffset(xzOffset - planeNormal * (xzOffset * planeNormal));
-
-	//Now set the mass its position.
-	massPos = referencePoint + xyzOffset;
-
-	//Lastly clean up the mess we made.
-	delete[] (--lines);
+	//Now clean up the mess.
+	delete[] triangles;
 }
 
 void HammockDemo::AddMassToParticlesIn(const Shape& s)

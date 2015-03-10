@@ -44,6 +44,7 @@ struct Shape
 };
 
 /** Quadrilateral implementation of Shape. */
+struct Triangle;
 struct Quadrilateral : public Shape
 {
 	Quadrilateral() : p0(0x0), p1(0x0), p2(0x0), p3(0x0) { }
@@ -56,6 +57,7 @@ struct Quadrilateral : public Shape
 	cyclone::Particle* p3;
 
 	virtual bool IntersectsWithPoint(const cyclone::Vector3&);
+	Triangle* GetTriangles() const;
 
 	/** Returns the lines parallel to p1-p0 and p2-p1. */
 	Line* GetCrossLines() const;
@@ -76,6 +78,7 @@ struct Triangle : public Shape
 	cyclone::Particle* p2;
 
 	virtual bool IntersectsWithPoint(const cyclone::Vector3&);
+	cyclone::real GetLambda(const cyclone::Vector3& triangleVec, const cyclone::Vector3& p_p0);
 
 	/** Returns line p1-p0 and tline p2-(GetMid(p0,p1)). */
 	virtual Line* GetCrossLines() const;
@@ -102,7 +105,7 @@ public:
 	/** Render the world */
 	virtual void display();
 	/** Calculates the mass object its position on the hammock. */
-	void SetMassPosition(const Shape&);
+	void SetMassPosition(const Quadrilateral&);
 	void AddMassToParticlesIn(const Shape&);
 
 private:
