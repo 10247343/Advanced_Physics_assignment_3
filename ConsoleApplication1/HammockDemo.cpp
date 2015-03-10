@@ -51,14 +51,19 @@ bool Triangle::IntersectsWithPoint(const cyclone::Vector3& p)
 	0 <= lambda <= 1 for both s and t and t + s <= 1 
 	lambda is calculated by dot(p - p0, X)/(dot(X, X) with 
 	X = A or B 
-	t, s and 1 - t - s are called the Barycentric coordinates. */
-	cyclone::Vector3 p_p0(p - p0);
-	cyclone::Vector3 p1_p0((p1.getPosition() - p0.getPosition()));
+	t, s and 1 - t - s are called the Barycentric coordinates.
+
+	We are using the xz position, so all the y values have to be 0. */
+	cyclone::Vector3 p_p0(p - p0->getPosition()); 
+	p_p0.y = 0;
+	cyclone::Vector3 p1_p0((p1->getPosition() - p0->getPosition()));
+	p1_p0.y = 0;
 	cyclone::real t((p1_p0 * p_p0) / (p1_p0 * p1_p0));
 	if (t < 0 || t > 1)
 		return false; //t is to high/low.
 
-	cyclone::Vector3 p2_p0((p2.getPosition() - p0.getPosition()));
+	cyclone::Vector3 p2_p0((p2->getPosition() - p0->getPosition()));
+	p2_p0.y = 0;
 	cyclone::real s((p2_p0 * p_p0) / (p2_p0 * p2_p0));
 	if (s < 0 || s > 1)
 		return false; //s is to high/low.
@@ -92,6 +97,9 @@ const int Triangle::FillArrayWithParticles(cyclone::Particle* array) const
 HammockDemo::HammockDemo()
 {
 	createHammock();
+
+	massRelativePos = cyclone::Vector3(0, 0, 0);
+	massPos = cyclone::Vector3(0, 0, 0);
 }
 
 /** HammockDemo destructor function, clearing all particle arrays */
@@ -123,15 +131,17 @@ void HammockDemo::createHammock()
 	//We only use the mass object if the number of particles is even.
 #ifdef NUMBER_OF_QUADRILATERALS
 	//Now create the Quadrilaterals.
-	Quadrilaterals = new Quadrilateral[NUMBER_OF_QUADRILATERALS];
+	quadrilaterals = new Quadrilateral[NUMBER_OF_QUADRILATERALS];
 
 	for (int i = 0; i < NUMBER_OF_QUADRILATERALS; i++)
 	{
 		int doubleI(i * 2);
-		Quadrilaterals[0] = Quadrilateral(*particles[doubleI++],
-			*particles[doubleI++],
-			*particles[doubleI++],
-			*particles[doubleI]);
+		cyclone::Particle* p0 = &particles[doubleI++];
+		cyclone::Particle* p1 = &particles[doubleI++];
+		cyclone::Particle* p2 = &particles[doubleI++];
+		cyclone::Particle* p3 = &particles[doubleI++];
+		quadrilaterals[i] = Quadrilateral(p0, p1, p2, p3);
+		p0 = 0x0; p1 = 0x0; p2 = 0x0; p3 = 0x0;
 	}
 #endif
 
@@ -182,6 +192,30 @@ void HammockDemo::update()
 	float timepast = (float)TimingData::get().lastFrameDuration * 0.001f;
 	if (timepast <= 0.0f) return;
 
+	//Check the quadrilateral the mass is on.
+	Quadrilateral* colQuad(0x0);
+	for (int i = 0; i < NUMBER_OF_QUADRILATERALS; i++)
+	{
+		if (quadrilaterals[i].IntersectsWithPoint(massRelativePos))
+		{
+			colQuad = &quadrilaterals[i];
+			break;
+		}
+	}
+
+	//Check if the mass is actually on a quadrilateral.
+	if (colQuad)
+	{
+		//Reset the mass for the particles.
+		for (int i = 0; i < PARTICLE_COUNT; i++)
+			particles[i].setMass(PARTICLE_MASS);
+
+		//Set massPos.
+		SetMassPosition(*colQuad);
+		//Now set the mass on the particles with the mass' current position.
+		AddMassToParticlesIn(*colQuad);
+	}
+
 	Application::update();
 }
 
@@ -229,8 +263,14 @@ void HammockDemo::display()
         glVertex3f(point1.x, point1.y, point1.z);
         glVertex3f(point2.x, point2.y, point2.z);
     }
-
 	glEnd();
+
+	//Draw mass object.
+	glColor3f(0, 0, 1);
+	glPushMatrix();
+	glTranslatef(massPos.x, massPos.y, massPos.z);
+	glutSolidSphere(0.5f, 10, 10);
+	glPopMatrix();
 }
 
 /** key handler */

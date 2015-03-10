@@ -15,7 +15,7 @@
 
 #define MASSOBJECT_MASS 20
 #if PARTICLE_COUNT % 2 == 0
-#define NUMBER_OF_QUADRILATERALS (PARTICLE_COUNT - 4) / 2
+#define NUMBER_OF_QUADRILATERALS (PARTICLE_COUNT - 2) / 2
 #endif
 
 /** Simple line container. */
@@ -39,22 +39,22 @@ struct Shape
 	These lines will form a plane which is used for calculating the position of the mass object. */
 	virtual Line* GetCrossLines() const = 0;
 	virtual const int FillArrayWithParticles(cyclone::Particle*) const = 0;
-	bool IntersectsWithPoint(const cyclone::Vector3&) = 0;
+	virtual bool IntersectsWithPoint(const cyclone::Vector3&) = 0;
 };
 
 /** Quadrilateral implementation of Shape. */
 struct Quadrilateral : public Shape
 {
-	Quadrilateral() : p0(0x0), p1(0x0), p2(0x0), p3(0x0)
+	Quadrilateral() : p0(0x0), p1(0x0), p2(0x0), p3(0x0) { }
 	Quadrilateral(cyclone::Particle* a0, cyclone::Particle* a1, cyclone::Particle* a2, cyclone::Particle* a3) :
-		p0(a0), p1(a1), p2(a2), p3(a3)
+		p0(a0), p1(a1), p2(a2), p3(a3) { }
 
 	cyclone::Particle* p0;
 	cyclone::Particle* p1;
 	cyclone::Particle* p2;
 	cyclone::Particle* p3;
 
-	bool IntersectsWithPoint(const cyclone::Vector3&);
+	virtual bool IntersectsWithPoint(const cyclone::Vector3&);
 
 	/** Returns the lines parallel to p1-p0 and p2-p1. */
 	Line* GetCrossLines() const;
@@ -66,15 +66,15 @@ This struct was supposed to be used like Quadrilateral, but got changed.
 Now this struct functions for an intersection check with a point. */
 struct Triangle : public Shape
 {
-	Triangle() : p0(0x0), p1(0x0), p2(0x0)
+	Triangle() : p0(0x0), p1(0x0), p2(0x0) { }
 	Triangle(cyclone::Particle* a0, cyclone::Particle* a1, cyclone::Particle* a2) :
-		p0(a0), p1(a1), p2(a2)
+		p0(a0), p1(a1), p2(a2) { }
 
 	cyclone::Particle* p0;
 	cyclone::Particle* p1;
 	cyclone::Particle* p2;
 
-	bool IntersectsWithPoint(const cyclone::Vector3&);
+	virtual bool IntersectsWithPoint(const cyclone::Vector3&);
 
 	/** Returns line p1-p0 and tline p2-(GetMid(p0,p1)). */
 	virtual Line* GetCrossLines() const;
@@ -109,7 +109,7 @@ private:
 	cyclone::Particle *particles;
 	cyclone::ParticleCable *cables;
 	cyclone::ParticleCableConstraint *supports;
-	Quadrilateral* Quadrilaterals;
+	Quadrilateral* quadrilaterals;
 };
 
 
