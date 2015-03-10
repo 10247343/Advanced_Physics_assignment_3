@@ -38,6 +38,18 @@ const int Rect::FillArrayWithParticles(cyclone::Particle* array) const
 
 bool Triangle::IntersectsWithPoint(const cyclone::Vector3& v)
 {
+	/** Equation: p = p0 + (p1 - p0) * t + (p2 - p0) * s
+	With: 
+	p = point
+	triangle(p0, p1, p2)
+
+	Theory: A point is one of the triangle's point + scaled vectors from that triangle's
+	point to the other triangle's points added up together. In this case we take p0
+	and then use scaled vectors A(p1 - p0) and B(p2 - p0).
+
+	We use the projection equation's lambda (lambda * (b / |b|)). Point intersects if
+	0 <= lambda <= 1 for both s and t. */
+
 	return false;
 }
 
