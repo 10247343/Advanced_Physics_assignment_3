@@ -14,6 +14,11 @@
 
 #define PARTICLE_MASS 2
 
+#define MASSOBJECT_MASS 20
+#if PARTICLE_COUNT % 2 == 0
+#define NUMBER_OF_QUADRILATERALS (PARTICLE_COUNT - 2) / 2
+#endif
+
 /** Simple line container. */
 struct Line
 {
@@ -31,40 +36,56 @@ struct Shape
 {
 	/** Gets the center coordinate of the line between vector to and from. */
 	cyclone::Vector3 GetMid(const cyclone::Vector3& from, const cyclone::Vector3& to) const;
-	/** Gets the cross lines from this shape. Needs shape specific implementation. */
+	/** Gets the cross lines from this shape. Needs shape specific implementation. 
+	These lines will form a plane which is used for calculating the position of the mass object. */
 	virtual Line* GetCrossLines() const = 0;
+	virtual const int FillArrayWithParticles(cyclone::Particle*) const = 0;
+	virtual bool IntersectsWithPoint(const cyclone::Vector3&) = 0;
 };
 
-/** Rect implementation of Shape. */
-struct Rect : public Shape
+/** Quadrilateral implementation of Shape. */
+struct Quadrilateral : public Shape
 {
-	cyclone::Vector3 p0;
-	cyclone::Vector3 p1;
-	cyclone::Vector3 p2;
-	cyclone::Vector3 p3;
+	Quadrilateral() : p0(0x0), p1(0x0), p2(0x0), p3(0x0) { }
+	Quadrilateral(cyclone::Particle* a0, cyclone::Particle* a1, cyclone::Particle* a2, cyclone::Particle* a3) :
+		p0(a0), p1(a1), p2(a2), p3(a3) { }
+
+	cyclone::Particle* p0;
+	cyclone::Particle* p1;
+	cyclone::Particle* p2;
+	cyclone::Particle* p3;
+
+	virtual bool IntersectsWithPoint(const cyclone::Vector3&);
 
 	/** Returns the lines parallel to p1-p0 and p2-p1. */
 	Line* GetCrossLines() const;
+	virtual const int FillArrayWithParticles(cyclone::Particle*) const;
 };
- /** Triangle implementation of Shape. */
+
+/** Triangle implementation of Shape.
+This struct was supposed to be used like Quadrilateral, but got changed.
+Now this struct functions for an intersection check with a point. */
 struct Triangle : public Shape
 {
-	cyclone::Vector3 p0;
-	cyclone::Vector3 p1;
-	cyclone::Vector3 p2;
+	Triangle() : p0(0x0), p1(0x0), p2(0x0) { }
+	Triangle(cyclone::Particle* a0, cyclone::Particle* a1, cyclone::Particle* a2) :
+		p0(a0), p1(a1), p2(a2) { }
+
+	cyclone::Particle* p0;
+	cyclone::Particle* p1;
+	cyclone::Particle* p2;
+
+	virtual bool IntersectsWithPoint(const cyclone::Vector3&);
 
 	/** Returns line p1-p0 and tline p2-(GetMid(p0,p1)). */
 	virtual Line* GetCrossLines() const;
+	virtual const int FillArrayWithParticles(cyclone::Particle*) const;
 };
 
 class HammockDemo : public Application
 {
-	cyclone::Particle *particles;
-	cyclone::ParticleCable *cables;
-	cyclone::ParticleCableConstraint *supports;
 	cyclone::ParticleRod *rods;
 	cyclone::ParticleWorld *world;
-
 public:
 	/** constructor and destructor */
 	HammockDemo();
@@ -83,10 +104,15 @@ public:
 	virtual void display();
 	/** Calculates the mass object its position on the hammock. */
 	void SetMassPosition(const Shape&);
+	void AddMassToParticlesIn(const Shape&);
 
 private:
 	cyclone::Vector3 massRelativePos;
 	cyclone::Vector3 massPos;
+	cyclone::Particle *particles;
+	cyclone::ParticleCable *cables;
+	cyclone::ParticleCableConstraint *supports;
+	Quadrilateral* quadrilaterals;
 };
 
 

@@ -1,9 +1,106 @@
 #include "HammockDemo.h"
 
+cyclone::Vector3 Shape::GetMid(const cyclone::Vector3& from, const cyclone::Vector3& to) const
+{
+	//Cast 0.5 to real for compatibility with cyclone.
+	return from + (to - from) * (cyclone::real)0.5;
+}
+
+bool Quadrilateral::IntersectsWithPoint(const cyclone::Vector3& v)
+{
+	//Create 2 triangles.
+	Triangle t1(p0, p1, p3);
+	Triangle t2(p1, p2, p3);
+	if (rods) delete[] rods;
+	return t1.IntersectsWithPoint(v) || t2.IntersectsWithPoint(v);
+}
+
+Line* Quadrilateral::GetCrossLines() const
+{
+	Line* toReturn = new Line[2];
+	toReturn[0] = Line(GetMid(p0->getPosition(), p3->getPosition()), GetMid(p1->getPosition(), p2->getPosition()));
+	toReturn[1] = Line(GetMid(p0->getPosition(), p1->getPosition()), GetMid(p2->getPosition(), p3->getPosition()));
+
+	return toReturn;
+}
+
+const int Quadrilateral::FillArrayWithParticles(cyclone::Particle* array) const
+{
+	//Fill the given array with the particle values.
+	*array = *p0;
+	*(++array) = *p1;
+	*(++array) = *p2;
+	*(++array) = *p3;
+
+	//return the length of the array.
+	return 4;
+}
+
+bool Triangle::IntersectsWithPoint(const cyclone::Vector3& p)
+{
+	/** Equation: p = p0 + (p1 - p0) * t + (p2 - p0) * s
+	With: 
+	p = point
+	triangle(p0, p1, p2)
+
+	Theory: A point is one of the triangle's point + scaled vectors from that triangle's
+	point to the other triangle's points added up together. In this case we take p0
+	and then use scaled vectors A(p1 - p0) and B(p2 - p0).
+
+	We use the projection equation's lambda (lambda * (b / |b|)). Point intersects if
+	0 <= lambda <= 1 for both s and t and t + s <= 1 
+	lambda is calculated by dot(p - p0, X)/(dot(X, X) with 
+	X = A or B 
+	t, s and 1 - t - s are called the Barycentric coordinates.
+
+	We are using the xz position, so all the y values have to be 0. */
+	cyclone::Vector3 p_p0(p - p0->getPosition()); 
+	p_p0.y = 0;
+	cyclone::Vector3 p1_p0((p1->getPosition() - p0->getPosition()));
+	p1_p0.y = 0;
+	cyclone::real t((p1_p0 * p_p0) / (p1_p0 * p1_p0));
+	if (t < 0 || t > 1)
+		return false; //t is to high/low.
+
+	cyclone::Vector3 p2_p0((p2->getPosition() - p0->getPosition()));
+	p2_p0.y = 0;
+	cyclone::real s((p2_p0 * p_p0) / (p2_p0 * p2_p0));
+	if (s < 0 || s > 1)
+		return false; //s is to high/low.
+
+	if (s + t <= 1)
+		return true; //Intersection.
+
+	return false; //No intersection.
+}
+
+Line* Triangle::GetCrossLines() const
+{
+	Line* toReturn = new Line[2];
+	toReturn[0] = Line(p0->getPosition(), p1->getPosition());
+	toReturn[1] = Line(GetMid(p0->getPosition(), p1->getPosition()), p2->getPosition());
+
+	return toReturn;
+}
+
+const int Triangle::FillArrayWithParticles(cyclone::Particle* array) const
+{
+	//Fill the given array with the particle values.
+	*array = *p0;
+	*(++array) = *p1;
+	*(++array) = *p2;
+
+	//return the length of the array.
+	return 3;
+}
+
 HammockDemo::HammockDemo()
 {
 	world = new cyclone::ParticleWorld(40);
 	createHammock();
+
+	massRelativePos = cyclone::Vector3(0, 0, 0);
+	massPos = cyclone::Vector3(0, 0, 0);
 }
 
 /** HammockDemo destructor function, clearing all particle arrays */
@@ -12,32 +109,6 @@ HammockDemo::~HammockDemo()
 	if (particles) delete[] particles;
 	if (cables) delete[] cables;
 	if (supports) delete[] supports;
-	if (rods) delete[] rods;
-}
-
-
-cyclone::Vector3 Shape::GetMid(const cyclone::Vector3& from, const cyclone::Vector3& to) const
-{
-	//Cast 0.5 to real for compatibility with cyclone.
-	return from + (to - from) * (cyclone::real)0.5;
-}
-
-Line* Rect::GetCrossLines() const
-{
-	Line* toReturn = new Line[2];
-	toReturn[0] = Line(GetMid(p0, p3), GetMid(p1, p2));
-	toReturn[1] = Line(GetMid(p0, p1), GetMid(p2, p3));
-
-	return toReturn;
-}
-
-Line* Triangle::GetCrossLines() const
-{
-	Line* toReturn = new Line[2];
-	toReturn[0] = Line(p0, p1);
-	toReturn[1] = Line(GetMid(p0, p1), p2);
-
-	return toReturn;
 }
 
 /** creating the hammock */
@@ -58,6 +129,24 @@ void HammockDemo::createHammock()
 		particles[i].setMass(PARTICLE_MASS);
 		world->getParticles().push_back(particles + i);
 	}
+
+	//Check if the number of particles is even.
+	//We only use the mass object if the number of particles is even.
+#ifdef NUMBER_OF_QUADRILATERALS
+	//Now create the Quadrilaterals.
+	quadrilaterals = new Quadrilateral[NUMBER_OF_QUADRILATERALS];
+
+	for (int i = 0; i < NUMBER_OF_QUADRILATERALS; i++)
+	{
+		int doubleI(i * 2);
+		cyclone::Particle* p0 = &particles[doubleI++];
+		cyclone::Particle* p1 = &particles[doubleI++];
+		cyclone::Particle* p2 = &particles[doubleI++];
+		cyclone::Particle* p3 = &particles[doubleI++];
+		quadrilaterals[i] = Quadrilateral(p0, p1, p2, p3);
+		p0 = 0x0; p1 = 0x0; p2 = 0x0; p3 = 0x0;
+	}
+#endif
 
 	// placing cables between the particles to reprecent the hammock
 	cables = new cyclone::ParticleCable[CABLE_COUNT];
@@ -118,6 +207,30 @@ void HammockDemo::update()
 
 	world->runPhysics(timepast);
 	
+	//Check the quadrilateral the mass is on.
+	Quadrilateral* colQuad(0x0);
+	for (int i = 0; i < NUMBER_OF_QUADRILATERALS; i++)
+	{
+		if (quadrilaterals[i].IntersectsWithPoint(massRelativePos))
+		{
+			colQuad = &quadrilaterals[i];
+			break;
+		}
+	}
+
+	//Check if the mass is actually on a quadrilateral.
+	if (colQuad)
+	{
+		//Reset the mass for the particles.
+		for (int i = 0; i < PARTICLE_COUNT; i++)
+			particles[i].setMass(PARTICLE_MASS);
+
+		//Set massPos.
+		SetMassPosition(*colQuad);
+		//Now set the mass on the particles with the mass' current position.
+		AddMassToParticlesIn(*colQuad);
+	}
+
 	Application::update();
 }
 
@@ -178,8 +291,14 @@ void HammockDemo::display()
         glVertex3f(point2.x, point2.y, point2.z);
     }
 	//*/
-
 	glEnd();
+
+	//Draw mass object.
+	glColor3f(0, 0, 1);
+	glPushMatrix();
+	glTranslatef(massPos.x, massPos.y, massPos.z);
+	glutSolidSphere(0.5f, 10, 10);
+	glPopMatrix();
 }
 
 /** key handler */
@@ -193,7 +312,7 @@ void HammockDemo::key(unsigned char key)
 
 void HammockDemo::SetMassPosition(const Shape& s)
 {
-	//Create a cross with the lines Parallel to the rect's lines.
+	//Create a cross with the lines Parallel to the Quadrilateral's lines.
 	//These lines will form the plane we will use to place the mass.
 	Line* lines = s.GetCrossLines();
 
@@ -215,4 +334,83 @@ void HammockDemo::SetMassPosition(const Shape& s)
 
 	//Lastly clean up the mess we made.
 	delete[] lines;
+}
+
+void HammockDemo::AddMassToParticlesIn(const Shape& s)
+{
+	//Get the paricles in an array and the length of the array.
+	cyclone::Particle* particleArr = new cyclone::Particle[4];
+	int length = s.FillArrayWithParticles(particleArr);
+
+	//Get all the positions on the corrosponding indexes of the particle array.
+	cyclone::Vector3* posArr = new cyclone::Vector3[length];
+
+	//Some index variables.
+	cyclone::Particle* parIndex = particleArr;
+	cyclone::Vector3* posIndex = posArr;
+
+	for (int i = 0; i < length; i++)
+	{
+		*posIndex = parIndex->getPosition();
+		posIndex++; parIndex++; //Increment pointers.
+	}
+
+	//Reset the index variables.
+	parIndex = particleArr;
+	posIndex = posArr;
+
+	//Safe check, avoid divide by zero by checking if mass object is standing on one 
+	//of the particles. If so, apply all mass on that particle and exit member function.
+	for (int i = 0; i < length; i++)
+	{
+		if (*posIndex == massPos)
+		{
+			//Give the particle all the mass.
+			parIndex->setMass(PARTICLE_MASS + MASSOBJECT_MASS);
+
+			//Clean up and exit this member function.
+			delete[] particleArr;
+			delete[] posArr;
+			return;
+		}
+		posIndex++; parIndex++; //Increment pointers.
+	}
+
+	//Reset the index variables.
+	parIndex = particleArr;
+	posIndex = posArr;
+
+	//Now calculate the total magnitude squared to each particle.
+	//And to prevent doing this again, save all the values in an array.
+	//We use squared instead of the actual magnitude to cause exponential differences in mass
+	//dividing instead of linear dividing.
+	cyclone::real* magnitudeArr = new cyclone::real[length];
+	cyclone::real* magnitudeIndex = magnitudeArr; //Index variable.
+	cyclone::real totalMagnitude(0);
+
+	for (int i = 0; i < length; i++)
+	{
+		*magnitudeIndex = (*posIndex - massPos).squareMagnitude();
+		totalMagnitude += *magnitudeIndex;
+
+		magnitudeIndex++; posIndex++; //Increment pointers.
+	}
+
+	//Reset the index variables.
+	magnitudeIndex = magnitudeArr;
+	posIndex = posArr;
+
+	//Loop through all the particles and give them the necessary mass.
+	for (int i = 0; i < length; i++)
+	{
+		//Add the aditional mass by magnitude/totalmagnitude * MASSOBJECT_MASS.
+		parIndex->setMass(PARTICLE_MASS + *magnitudeIndex * MASSOBJECT_MASS / totalMagnitude);
+
+		posIndex++; parIndex++; magnitudeIndex++; //Increment pointers.
+	}
+
+	//Cleanup the mess.
+	delete[] particleArr;
+	delete[] posArr;
+	delete[] magnitudeArr;
 }
