@@ -11,7 +11,7 @@ bool Quadrilateral::IntersectsWithPoint(const cyclone::Vector3& v)
 	//Create 2 triangles.
 	Triangle t1(p0, p1, p3);
 	Triangle t2(p1, p2, p3);
-	if (rods) delete[] rods;
+	
 	return t1.IntersectsWithPoint(v) || t2.IntersectsWithPoint(v);
 }
 
@@ -99,8 +99,8 @@ HammockDemo::HammockDemo()
 	world = new cyclone::ParticleWorld(40);
 	createHammock();
 
-	massRelativePos = cyclone::Vector3(0, 0, 0);
-	massPos = cyclone::Vector3(0, 0, 0);
+	massRelativePos = cyclone::Vector3(9, 0, 1);
+	massPos = cyclone::Vector3(9, 0, 1);
 }
 
 /** HammockDemo destructor function, clearing all particle arrays */
@@ -109,6 +109,7 @@ HammockDemo::~HammockDemo()
 	if (particles) delete[] particles;
 	if (cables) delete[] cables;
 	if (supports) delete[] supports;
+	if (rods) delete[] rods;
 }
 
 /** creating the hammock */
@@ -173,11 +174,11 @@ void HammockDemo::createHammock()
 		int j = (i%2 + (cyclone::real(i/2)*(PARTICLE_COUNT-2)));
 		supports[i].particle = &particles[j];
 		if(i < SUPPORT_COUNT/2)
-			supports[i].anchor = cyclone::Vector3(-2,5,0);
+			supports[i].anchor = cyclone::Vector3(0,5,0);
 		else 
 			supports[i].anchor = cyclone::Vector3(16,5,0);
-		supports[i].maxLength = 6.0f;
-		supports[i].restitution = 0.9f;
+		supports[i].maxLength = 3.0f;
+		supports[i].restitution = 0.7f;
 		world->getContactGenerators().push_back(&supports[i]);
 	}
 
@@ -241,7 +242,7 @@ void HammockDemo::display()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// place camera
 	glLoadIdentity();
-	gluLookAt(0.0, 10.0, -15.0, 2.0, 2.0, 2.0, 0.0, 1.0, 0.0);
+	gluLookAt(0.0, 5.0, 15.0, 4.0, 0.0, 4.0, 0.0, 1.0, 0.0);
 
 	//*
 	// draw particle (points)
@@ -306,7 +307,12 @@ void HammockDemo::key(unsigned char key)
 {
     switch(key)
     {
-    case '1': printf( "test string");//currentShotType = PISTOL; break;
+	case '1': printf( "%f,%f,%f\n",world->getParticles()[3]->getPosition().x,world->getParticles()[3]->getPosition().y,world->getParticles()[3]->getPosition().z); break;
+	case '2': printf( "%f,%f,%f\n",world->getParticles()[5]->getPosition().x,world->getParticles()[5]->getPosition().y,world->getParticles()[5]->getPosition().z); break;
+	case 'w': massRelativePos.z -= 0.2f; break;
+	case 's': massRelativePos.z += 0.2f; break;
+	case 'a': massRelativePos.x -= 0.2f; break;
+	case 'd': massRelativePos.x += 0.2f; break;
     }
 }
 
@@ -333,7 +339,7 @@ void HammockDemo::SetMassPosition(const Shape& s)
 	massPos = referencePoint + xyzOffset;
 
 	//Lastly clean up the mess we made.
-	delete[] lines;
+	delete[] (--lines);
 }
 
 void HammockDemo::AddMassToParticlesIn(const Shape& s)

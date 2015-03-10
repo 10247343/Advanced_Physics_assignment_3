@@ -12,9 +12,9 @@
 #define SUPPORT_COUNT 4
 #define ROD_COUNT 2
 
-#define PARTICLE_MASS 2
+#define PARTICLE_MASS 1
 
-#define MASSOBJECT_MASS 20
+#define MASSOBJECT_MASS 50
 #if PARTICLE_COUNT % 2 == 0
 #define NUMBER_OF_QUADRILATERALS (PARTICLE_COUNT - 2) / 2
 #endif
@@ -84,8 +84,7 @@ struct Triangle : public Shape
 
 class HammockDemo : public Application
 {
-	cyclone::ParticleRod *rods;
-	cyclone::ParticleWorld *world;
+	
 public:
 	/** constructor and destructor */
 	HammockDemo();
@@ -110,6 +109,8 @@ private:
 	cyclone::Vector3 massRelativePos;
 	cyclone::Vector3 massPos;
 	cyclone::Particle *particles;
+	cyclone::ParticleRod *rods;
+	cyclone::ParticleWorld *world;
 	cyclone::ParticleCable *cables;
 	cyclone::ParticleCableConstraint *supports;
 	Quadrilateral* quadrilaterals;
