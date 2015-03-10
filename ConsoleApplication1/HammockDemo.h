@@ -15,7 +15,7 @@
 
 #define MASSOBJECT_MASS 20
 #if PARTICLE_COUNT % 2 == 0
-#define NUMBER_OF_RECTS (PARTICLE_COUNT - 4) / 2
+#define NUMBER_OF_QUADRILATERALS (PARTICLE_COUNT - 4) / 2
 #endif
 
 /** Simple line container. */
@@ -42,11 +42,11 @@ struct Shape
 	bool IntersectsWithPoint(const cyclone::Vector3&) = 0;
 };
 
-/** Rect implementation of Shape. */
-struct Rect : public Shape
+/** Quadrilateral implementation of Shape. */
+struct Quadrilateral : public Shape
 {
-	Rect() : p0(0x0), p1(0x0), p2(0x0), p3(0x0)
-	Rect(cyclone::Particle* a0, cyclone::Particle* a1, cyclone::Particle* a2, cyclone::Particle* a3) :
+	Quadrilateral() : p0(0x0), p1(0x0), p2(0x0), p3(0x0)
+	Quadrilateral(cyclone::Particle* a0, cyclone::Particle* a1, cyclone::Particle* a2, cyclone::Particle* a3) :
 		p0(a0), p1(a1), p2(a2), p3(a3)
 
 	cyclone::Particle* p0;
@@ -62,7 +62,7 @@ struct Rect : public Shape
 };
 
 /** Triangle implementation of Shape.
-This struct was supposed to be used like Rect, but got changed.
+This struct was supposed to be used like Quadrilateral, but got changed.
 Now this struct functions for an intersection check with a point. */
 struct Triangle : public Shape
 {
@@ -109,7 +109,7 @@ private:
 	cyclone::Particle *particles;
 	cyclone::ParticleCable *cables;
 	cyclone::ParticleCableConstraint *supports;
-	Rect* rects;
+	Quadrilateral* Quadrilaterals;
 };
 
 

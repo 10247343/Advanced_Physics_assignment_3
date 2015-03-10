@@ -6,7 +6,7 @@ cyclone::Vector3 Shape::GetMid(const cyclone::Vector3& from, const cyclone::Vect
 	return from + (to - from) * (cyclone::real)0.5;
 }
 
-bool Rect::IntersectsWithPoint(const cyclone::Vector3& v)
+bool Quadrilateral::IntersectsWithPoint(const cyclone::Vector3& v)
 {
 	//Create 2 triangles.
 	Triangle t1(p0, p1, p3);
@@ -15,7 +15,7 @@ bool Rect::IntersectsWithPoint(const cyclone::Vector3& v)
 	return t1.IntersectsWithPoint(v) || t2.IntersectsWithPoint(v);
 }
 
-Line* Rect::GetCrossLines() const
+Line* Quadrilateral::GetCrossLines() const
 {
 	Line* toReturn = new Line[2];
 	toReturn[0] = Line(GetMid(p0->getPosition(), p3->getPosition()), GetMid(p1->getPosition(), p2->getPosition()));
@@ -24,7 +24,7 @@ Line* Rect::GetCrossLines() const
 	return toReturn;
 }
 
-const int Rect::FillArrayWithParticles(cyclone::Particle* array) const
+const int Quadrilateral::FillArrayWithParticles(cyclone::Particle* array) const
 {
 	//Fill the given array with the particle values.
 	*array = *p0;
@@ -36,7 +36,7 @@ const int Rect::FillArrayWithParticles(cyclone::Particle* array) const
 	return 4;
 }
 
-bool Triangle::IntersectsWithPoint(const cyclone::Vector3& v)
+bool Triangle::IntersectsWithPoint(const cyclone::Vector3& p)
 {
 	/** Equation: p = p0 + (p1 - p0) * t + (p2 - p0) * s
 	With: 
@@ -48,9 +48,25 @@ bool Triangle::IntersectsWithPoint(const cyclone::Vector3& v)
 	and then use scaled vectors A(p1 - p0) and B(p2 - p0).
 
 	We use the projection equation's lambda (lambda * (b / |b|)). Point intersects if
-	0 <= lambda <= 1 for both s and t. */
+	0 <= lambda <= 1 for both s and t and t + s <= 1 
+	lambda is calculated by dot(p - p0, X)/(dot(X, X) with 
+	X = A or B 
+	t, s and 1 - t - s are called the Barycentric coordinates. */
+	cyclone::Vector3 p_p0(p - p0);
+	cyclone::Vector3 p1_p0((p1.getPosition() - p0.getPosition()));
+	cyclone::real t((p1_p0 * p_p0) / (p1_p0 * p1_p0));
+	if (t < 0 || t > 1)
+		return false; //t is to high/low.
 
-	return false;
+	cyclone::Vector3 p2_p0((p2.getPosition() - p0.getPosition()));
+	cyclone::real s((p2_p0 * p_p0) / (p2_p0 * p2_p0));
+	if (s < 0 || s > 1)
+		return false; //s is to high/low.
+
+	if (s + t <= 1)
+		return true; //Intersection.
+
+	return false; //No intersection.
 }
 
 Line* Triangle::GetCrossLines() const
@@ -105,14 +121,14 @@ void HammockDemo::createHammock()
 
 	//Check if the number of particles is even.
 	//We only use the mass object if the number of particles is even.
-#ifdef NUMBER_OF_RECTS
-	//Now create the rects.
-	rects = new Rect[NUMBER_OF_RECTS];
+#ifdef NUMBER_OF_QUADRILATERALS
+	//Now create the Quadrilaterals.
+	Quadrilaterals = new Quadrilateral[NUMBER_OF_QUADRILATERALS];
 
-	for (int i = 0; i < NUMBER_OF_RECTS; i++)
+	for (int i = 0; i < NUMBER_OF_QUADRILATERALS; i++)
 	{
 		int doubleI(i * 2);
-		rects[0] = Rect(*particles[doubleI++],
+		Quadrilaterals[0] = Quadrilateral(*particles[doubleI++],
 			*particles[doubleI++],
 			*particles[doubleI++],
 			*particles[doubleI]);
@@ -228,7 +244,7 @@ void HammockDemo::key(unsigned char key)
 
 void HammockDemo::SetMassPosition(const Shape& s)
 {
-	//Create a cross with the lines Parallel to the rect's lines.
+	//Create a cross with the lines Parallel to the Quadrilateral's lines.
 	//These lines will form the plane we will use to place the mass.
 	Line* lines = s.GetCrossLines();
 
