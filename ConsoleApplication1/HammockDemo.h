@@ -8,8 +8,9 @@
 #include "../utils/ogl_headers.h"
 
 #define PARTICLE_COUNT 8
-#define CABLE_COUNT 10
+#define CABLE_COUNT 8
 #define SUPPORT_COUNT 4
+#define ROD_COUNT 2
 
 #define PARTICLE_MASS 2
 
@@ -61,6 +62,8 @@ class HammockDemo : public Application
 	cyclone::Particle *particles;
 	cyclone::ParticleCable *cables;
 	cyclone::ParticleCableConstraint *supports;
+	cyclone::ParticleRod *rods;
+	cyclone::ParticleWorld *world;
 
 public:
 	/** constructor and destructor */

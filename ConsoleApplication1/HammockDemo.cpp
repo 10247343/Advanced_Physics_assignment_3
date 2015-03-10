@@ -2,6 +2,7 @@
 
 HammockDemo::HammockDemo()
 {
+	world = new cyclone::ParticleWorld(40);
 	createHammock();
 }
 
@@ -11,6 +12,7 @@ HammockDemo::~HammockDemo()
 	if (particles) delete[] particles;
 	if (cables) delete[] cables;
 	if (supports) delete[] supports;
+	if (rods) delete[] rods;
 }
 
 
@@ -45,14 +47,16 @@ void HammockDemo::createHammock()
 	particles = new cyclone::Particle[PARTICLE_COUNT];
 	for(int i = 0; i < PARTICLE_COUNT; i++)
 	{
-		particles[i].setPosition(cyclone::real(i/2)*3.0f+2.0f,
+		particles[i].setPosition(cyclone::real(i/2)*4.0f+2.0f,
 			3.0f,
 			i%2*2.0f-2.0f);
+		printf("%f,%f,%f \n", particles[i].getPosition().x, particles[i].getPosition().y, particles[i].getPosition().z);
 		particles[i].setVelocity(0.0f,0.0f,0.0f);
 		particles[i].setDamping(0.7f);
 		particles[i].setAcceleration(cyclone::Vector3::GRAVITY);
 		particles[i].clearAccumulator();
 		particles[i].setMass(PARTICLE_MASS);
+		world->getParticles().push_back(particles + i);
 	}
 
 	// placing cables between the particles to reprecent the hammock
@@ -61,17 +65,17 @@ void HammockDemo::createHammock()
 	{
 		cables[i].particle[0] = &particles[i];
 		cables[i].particle[1] = &particles[i+2];
-		cables[i].maxLength = 2.0f;
-		cables[i].restitution = 0.7f;
-        //world.getContactGenerators().push_back(&cables[i]);
+		cables[i].maxLength = 5.0f;
+		cables[i].restitution = 0.5f;
+        world->getContactGenerators().push_back(&cables[i]);
 	}
-	for(int i = 0; i < PARTICLE_COUNT; i += 2){
-		int j = cyclone::real(i/2)+6;
+	for(int i = 2; i < PARTICLE_COUNT-2; i += 2){
+		int j = cyclone::real(i/2)+5;
 		cables[j].particle[0] = &particles[i];
 		cables[j].particle[1] = &particles[i+1];
-		cables[j].maxLength = 1.5f;
-		cables[j].restitution = 0.4f;
-		//world.getContactGenerators().push_back(&cables[i]);
+		cables[j].maxLength = 2.5f;
+		cables[j].restitution = 0.6f;
+		world->getContactGenerators().push_back(&cables[i]);
 	}
 
 	// attaching suport to the hammock
@@ -83,10 +87,20 @@ void HammockDemo::createHammock()
 			supports[i].anchor = cyclone::Vector3(-2,5,0);
 		else 
 			supports[i].anchor = cyclone::Vector3(16,5,0);
-		supports[i].maxLength = 4.0f;
-		supports[i].restitution = 0.8f;
-		//world.getContactGenerators().push_back(&supports[i]);
+		supports[i].maxLength = 6.0f;
+		supports[i].restitution = 0.9f;
+		world->getContactGenerators().push_back(&supports[i]);
 	}
+
+	// placing rods in hammock to prevent collapsing
+	rods = new cyclone::ParticleRod[ROD_COUNT];
+	for(int i = 0; i < ROD_COUNT; i++)
+	{
+		int j = (i + i*(PARTICLE_COUNT-3));
+		rods[i].particle[0] = &particles[j];
+		rods[i].particle[1] = &particles[j+1];
+	}
+
 }
 
 /** retrun demo title */
@@ -102,6 +116,8 @@ void HammockDemo::update()
 	float timepast = (float)TimingData::get().lastFrameDuration * 0.001f;
 	if (timepast <= 0.0f) return;
 
+	world->runPhysics(timepast);
+	
 	Application::update();
 }
 
@@ -121,7 +137,7 @@ void HammockDemo::display()
 		glPushMatrix();
 		cyclone::Vector3 position = particles[i].getPosition();
 		glTranslatef(position.x, position.y, position.z);
-		glutSolidSphere(0.5f, 10, 10);
+		glutSolidSphere(0.1f, 10, 10);
 		glPopMatrix();
 	}
 	//*/
@@ -149,6 +165,19 @@ void HammockDemo::display()
         glVertex3f(point1.x, point1.y, point1.z);
         glVertex3f(point2.x, point2.y, point2.z);
     }
+	//*/
+
+	//*
+	// draw beem
+	glColor3f(1,0,0);
+    for (unsigned i = 0; i < ROD_COUNT; i++)
+    {
+        const cyclone::Vector3 &point1 = rods[i].particle[0]->getPosition();
+        const cyclone::Vector3 &point2 = rods[i].particle[1]->getPosition();
+        glVertex3f(point1.x, point1.y, point1.z);
+        glVertex3f(point2.x, point2.y, point2.z);
+    }
+	//*/
 
 	glEnd();
 }
