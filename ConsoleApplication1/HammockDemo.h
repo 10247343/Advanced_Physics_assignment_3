@@ -117,6 +117,7 @@ private:
 	cyclone::ParticleCable *cables;
 	cyclone::ParticleCableConstraint *supports;
 	Quadrilateral* quadrilaterals;
+	int intersectCounter;
 };
 
 

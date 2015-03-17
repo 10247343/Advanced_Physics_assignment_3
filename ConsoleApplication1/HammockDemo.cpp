@@ -118,6 +118,7 @@ HammockDemo::HammockDemo()
 
 	massRelativePos = cyclone::Vector3(5, 0, 1);
 	massPos = cyclone::Vector3(9, 0, 1);
+	intersectCounter = 0;
 }
 
 /** HammockDemo destructor function, clearing all particle arrays */
@@ -231,9 +232,10 @@ void HammockDemo::update()
 	Quadrilateral* colQuad(0x0);
 	for (int i = 0; i < NUMBER_OF_QUADRILATERALS; i++)
 	{
-		if (quadrilaterals[i].IntersectsWithPoint(massRelativePos))
+		if (quadrilaterals[i].IntersectsWithPoint(cyclone::Vector3(massRelativePos.x, 0, massRelativePos.y)))
 		{
 			colQuad = &quadrilaterals[i];
+			printf("Intersection %d in %d\n", ++intersectCounter, i);
 			break;
 		}
 	}
@@ -241,10 +243,12 @@ void HammockDemo::update()
 	for (int i = 0; i < PARTICLE_COUNT; i++)
 		particles[i].setMass(PARTICLE_MASS);
 
+	massPos = cyclone::Vector3();
+
 	//Check if the mass is actually on a quadrilateral.
 	if (colQuad)
 	{
-		printf("Intersection detected\n");
+		//printf("Intersection detected %d\n", ++intersectCounter);
 
 		//Set massPos.
 		SetMassPosition(*colQuad);
@@ -262,9 +266,9 @@ void HammockDemo::display()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// place camera
 	glLoadIdentity();
-	gluLookAt(10.0, 0.0, 15.0,
+	gluLookAt(10.0, 10.0, 0.0,
 		10.0, 0.0, 0.0,
-		0.0, 1.0, 0.0);
+		0.0, 0.0, 1.0);
 
 	//*
 	// draw particle (points)
@@ -317,9 +321,10 @@ void HammockDemo::display()
 	glEnd();
 
 	//Draw mass object.
+	cyclone::Vector3 drawPos(massPos == cyclone::Vector3() ? massRelativePos : massPos);
 	glColor3f(0, 0, 1);
 	glPushMatrix();
-	glTranslatef(massPos.x, massPos.y, massPos.z);
+	glTranslatef(drawPos.x, drawPos.y, drawPos.z);
 	glutSolidSphere(0.5f, 10, 10);
 	glPopMatrix();
 }
@@ -342,7 +347,7 @@ void HammockDemo::SetMassPosition(const Quadrilateral& quadrilateral)
 {	
 	//Get the colliding traingle.
 	Triangle* triangles = quadrilateral.GetTriangles();
-	Triangle* target = triangles->IntersectsWithPoint(massRelativePos) ? triangles : (triangles + 1);
+	Triangle* target = triangles->IntersectsWithPoint(cyclone::Vector3(massRelativePos.x, 0, massRelativePos.y)) ? triangles : (triangles + 1);
 
 	//Get the lambdas for the relative point (so y = 0)
 	cyclone::Vector3 tVec(target->p1->getPosition() - target->p0->getPosition()); //p1_p0
