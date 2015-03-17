@@ -11,7 +11,7 @@ Triangle* Quadrilateral::GetTriangles() const
 	//Create 2 triangles.
 	Triangle* toReturn = new Triangle[2];
 	toReturn[0] = Triangle(p0, p1, p3);
-	toReturn[1] = Triangle(p1, p2, p3);
+	toReturn[1] = Triangle(p0, p2, p3);
 
 	return toReturn;
 }
@@ -139,7 +139,7 @@ void HammockDemo::createHammock()
 		particles[i].setPosition(cyclone::real(i/2)*4.0f+2.0f,
 			3.0f,
 			i%2*2.0f-2.0f);
-		printf("%f,%f,%f \n", particles[i].getPosition().x, particles[i].getPosition().y, particles[i].getPosition().z);
+		//printf("%f,%f,%f \n", particles[i].getPosition().x, particles[i].getPosition().y, particles[i].getPosition().z);
 		particles[i].setVelocity(0.0f,0.0f,0.0f);
 		particles[i].setDamping(0.7f);
 		particles[i].setAcceleration(cyclone::Vector3::GRAVITY);
@@ -206,6 +206,8 @@ void HammockDemo::createHammock()
 		int j = (i + i*(PARTICLE_COUNT-3));
 		rods[i].particle[0] = &particles[j];
 		rods[i].particle[1] = &particles[j+1];
+		rods[i].length = 2;
+		world->getContactGenerators().push_back(&rods[i]);
 	}
 
 }
@@ -260,7 +262,9 @@ void HammockDemo::display()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// place camera
 	glLoadIdentity();
-	gluLookAt(0.0, 5.0, 15.0, 4.0, 0.0, 4.0, 0.0, 1.0, 0.0);
+	gluLookAt(10.0, 0.0, 15.0,
+		10.0, 0.0, 0.0,
+		0.0, 1.0, 0.0);
 
 	//*
 	// draw particle (points)
@@ -325,8 +329,8 @@ void HammockDemo::key(unsigned char key)
 {
     switch(key)
     {
-	case '1': printf( "%f,%f,%f\n",world->getParticles()[3]->getPosition().x,world->getParticles()[3]->getPosition().y,world->getParticles()[3]->getPosition().z); break;
-	case '2': printf( "%f,%f,%f\n",world->getParticles()[5]->getPosition().x,world->getParticles()[5]->getPosition().y,world->getParticles()[5]->getPosition().z); break;
+	case '1': printf( "%f,%f,%f\n",world->getParticles()[0]->getPosition().x,world->getParticles()[0]->getPosition().y,world->getParticles()[0]->getPosition().z); break;
+	case '2': printf( "%f,%f,%f\n",world->getParticles()[1]->getPosition().x,world->getParticles()[1]->getPosition().y,world->getParticles()[1]->getPosition().z); break;
 	case 'w': massRelativePos.z -= 0.2f; break;
 	case 's': massRelativePos.z += 0.2f; break;
 	case 'a': massRelativePos.x -= 0.2f; break;
