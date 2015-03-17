@@ -116,7 +116,7 @@ HammockDemo::HammockDemo()
 	world = new cyclone::ParticleWorld(40);
 	createHammock();
 
-	massRelativePos = cyclone::Vector3(9, 0, 1);
+	massRelativePos = cyclone::Vector3(5, 0, 1);
 	massPos = cyclone::Vector3(9, 0, 1);
 }
 
@@ -235,13 +235,14 @@ void HammockDemo::update()
 			break;
 		}
 	}
+	//Reset the mass for the particles.
+	for (int i = 0; i < PARTICLE_COUNT; i++)
+		particles[i].setMass(PARTICLE_MASS);
 
 	//Check if the mass is actually on a quadrilateral.
 	if (colQuad)
 	{
-		//Reset the mass for the particles.
-		for (int i = 0; i < PARTICLE_COUNT; i++)
-			particles[i].setMass(PARTICLE_MASS);
+		printf("Intersection detected\n");
 
 		//Set massPos.
 		SetMassPosition(*colQuad);
