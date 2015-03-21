@@ -1,4 +1,4 @@
-#include "Box.h";
+#include "Box.h"
 
 Box::Box()
 {

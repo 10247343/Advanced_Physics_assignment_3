@@ -9,6 +9,7 @@
  * implies agreement with all terms and conditions of the accompanying
  * software licence.
  */
+#pragma once
 #include <cstdlib>
 
 #include <cyclone/cyclone.h>
