@@ -7,6 +7,9 @@
 #include "../utils/timing.h"
 #include "../utils/ogl_headers.h"
 
+#include "Box.h"
+
+#define NUMBER_OF_BOXES 1
 #define PARTICLE_COUNT 8
 #define ROD_COUNT 12
 
@@ -109,9 +112,10 @@ public:
 	virtual void display();
 
 private:
-	cyclone::Particle *particles;
-	cyclone::ParticleRod *rods;
-	cyclone::ParticleWorld *world;
+	Box* boxes;
+	cyclone::Particle* particles;
+	cyclone::ParticleRod* rods;
+	cyclone::ParticleWorld* world;
 };
 
 

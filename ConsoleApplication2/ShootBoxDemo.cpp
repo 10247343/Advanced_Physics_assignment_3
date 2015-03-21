@@ -122,7 +122,22 @@ const int Triangle::FillArrayWithParticles(cyclone::Particle* array) const
 
 ShootBoxDemo::ShootBoxDemo()
 {
+	cyclone::Vector3 test2 = *new cyclone::Vector3(2,0,4); 
+	test2.invert();
+
+	//*
 	//world = new cyclone::ParticleWorld(40);
+	boxes = new Box[NUMBER_OF_BOXES];
+	
+	cyclone::Particle test = *new cyclone::Particle();
+	test.setMass(2.2);
+
+	//*
+	for(int i = 0; i < NUMBER_OF_BOXES; i++)
+	{
+		boxes[i] = *new Box(*new cyclone::Vector3(0,0,0), 2.2);
+	}
+	//*/
 }
 
 /** HammockDemo destructor function, clearing all particle arrays */
@@ -147,7 +162,6 @@ void ShootBoxDemo::update()
 
 	//world->runPhysics(timepast);
 	
-	
 
 	Application::update();
 }
@@ -162,6 +176,11 @@ void ShootBoxDemo::display()
 	gluLookAt(10.0, 10.0, 0.0,
 		10.0, 0.0, 0.0,
 		0.0, 0.0, 1.0);
+
+	for(int i = 0; i < NUMBER_OF_BOXES; i++)
+	{
+		boxes[i].display();
+	}
 
 	/*
 	// draw particle (points)
@@ -194,8 +213,11 @@ void ShootBoxDemo::key(unsigned char key)
 {
     switch(key)
     {
-	case '1': printf( "1"); break;
-	case '2': printf( "2"); break;
+	case '-': printf( "mass down"); break;
+	case '+': printf( "mass up"); break;
+	case 'n': printf( "new game"); break;
+	case 'r': printf( "retry game"); break;
+	case 32: printf( "shoot"); break;
     }
 }
 

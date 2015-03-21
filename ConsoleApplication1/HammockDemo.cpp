@@ -293,6 +293,15 @@ void HammockDemo::display()
         glVertex3f(point1.x, point1.y, point1.z);
         glVertex3f(point2.x, point2.y, point2.z);
     }
+	//*
+	glColor3f(0,0,1);
+    for (int i = 0; i < CABLE_COUNT; i++)
+    {
+        const cyclone::Vector3 &point1 = cyclone::Vector3(cables[i].particle[0]->getPosition().x,0,cables[i].particle[0]->getPosition().z);
+        const cyclone::Vector3 &point2 = cyclone::Vector3(cables[i].particle[1]->getPosition().x,0,cables[i].particle[1]->getPosition().z);
+        glVertex3f(point1.x, point1.y, point1.z);
+        glVertex3f(point2.x, point2.y, point2.z);
+    }
 	//*/
 
 	//*
@@ -332,6 +341,7 @@ void HammockDemo::display()
 /** key handler */
 void HammockDemo::key(unsigned char key)
 {
+	printf("key: %d\n",key);
     switch(key)
     {
 	case '1': printf( "%f,%f,%f\n",world->getParticles()[0]->getPosition().x,world->getParticles()[0]->getPosition().y,world->getParticles()[0]->getPosition().z); break;

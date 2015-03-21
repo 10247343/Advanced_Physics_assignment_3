@@ -7,14 +7,22 @@
 #include "../utils/timing.h"
 #include "../utils/ogl_headers.h"
 
+#define CORNER_COUNT 8
+#define SIZE 2
+
 class Box
 {
 
 public:
 	Box();
+	Box(cyclone::Vector3 position, double mass);
 	virtual ~Box();
 
-	int getMass() {return mass;}
+	/** Render the box */
+	virtual void display();
+
+	// getters and setters
+	double getMass() {return mass;}
 	cyclone::Particle* getCorners() {return corners;}
 	cyclone::ParticleRod* getRibs() {return ribs;}
 
