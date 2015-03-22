@@ -4,15 +4,15 @@ Box::Box()
 {
 	printf("empty box\n\n");
 
-	body = new cyclone::RigidBody();
-
-	createBox(*new cyclone::Vector3(0,0,0), 2.2);
+	//body = new cyclone::RigidBody();
+	//createBox(*new cyclone::Vector3(0,0,0), 2.2);
 }
 
 Box::Box(cyclone::Vector3 position, double mass)
 {
 	//createBox(position,mass);
 	body = new cyclone::RigidBody();
+	createBox(position, mass);
 }
 
 Box::~Box()

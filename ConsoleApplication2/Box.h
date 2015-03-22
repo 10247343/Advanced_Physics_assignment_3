@@ -45,8 +45,8 @@ public:
 
 		glPushMatrix();
 		glMultMatrixf(mat);
-		//glScalef(halfSize.x*2,halfSize.y*2,halfSize.z*2);
-		glutSolidCube(4.0f);
+		glScalef(halfSize.x*2,halfSize.y*2,halfSize.z*2);
+		glutSolidCube(1.0f);
 		glPopMatrix();
 		//*/
 		glBegin(GL_LINES);

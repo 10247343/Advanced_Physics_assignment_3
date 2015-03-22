@@ -10,7 +10,7 @@
 
 #include "Box.h"
 
-#define NUMBER_OF_BOXES 1
+#define NUMBER_OF_BOXES 16
 #define PARTICLE_COUNT 8
 #define ROD_COUNT 12
 

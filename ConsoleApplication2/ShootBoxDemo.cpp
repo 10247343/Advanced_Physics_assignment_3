@@ -12,7 +12,9 @@ ShootBoxDemo::ShootBoxDemo()
 	//*
 	for(int i = 0; i < NUMBER_OF_BOXES; i++)
 	{
-		boxes[i] = *new Box(*new cyclone::Vector3(0,0,0), 2.2);
+		cyclone::Vector3 position = *new cyclone::Vector3(0,(SIZE+0.1)*((int)(i/4)),(SIZE+0.1)*(i%4));
+		
+		boxes[i] = *new Box(position, 2.2);
 	}
 	//*/
 }
