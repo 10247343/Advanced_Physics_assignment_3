@@ -12,6 +12,7 @@ Box::Box()
 Box::Box(cyclone::Vector3 position, double mass)
 {
 	//createBox(position,mass);
+	body = new cyclone::RigidBody();
 }
 
 Box::~Box()
@@ -113,7 +114,7 @@ void Box::display()
 {
 	glEnable(GL_NORMALIZE);
     glColor3f(1,0,0);
-	//render();
+	render();
 	glDisable(GL_NORMALIZE);
 	/*
 	// draw particle (points)

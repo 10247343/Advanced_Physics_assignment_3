@@ -85,18 +85,50 @@ void ShootBoxDemo::update()
 /** draw the world */
 void ShootBoxDemo::display()
 {
+	/*
 	// clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// place camera
 	glLoadIdentity();
-	gluLookAt(5.0, 0.0, -10.0,
-		5.0, 0.0, 0.0,
+	gluLookAt(0.0, 0.0, -10.0,
+		0.0, 0.0, 0.0,
 		0.0, 1.0, 0.0);
+	//*/
+	const static GLfloat lightPosition[] = {0.7f,-1,0.4f,0};
+    const static GLfloat lightPositionMirror[] = {0.7f,1,0.4f,0};
 
-	for(int i = 0; i < NUMBER_OF_BOXES; i++)
+    RigidBodyApplication::display();
+
+	// Render the bones
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+    glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+    glEnable(GL_COLOR_MATERIAL);
+
+    glEnable(GL_NORMALIZE);
+    glColor3f(1,0,0);
+    for(int i = 0; i < NUMBER_OF_BOXES; i++)
 	{
-		boxes[i].display();
+		//boxes[i].display();
+		boxes[i].render();
 	}
+    glDisable(GL_NORMALIZE);
+
+    glDisable(GL_LIGHTING);
+    glDisable(GL_COLOR_MATERIAL);
+
+    glDisable(GL_DEPTH_TEST);
+    glBegin(GL_LINES);
+
+	/*
+	glVertex3f(-20,0,0);
+    glVertex3f(20,0,0);
+    glVertex3f(0,0,-20);
+    glVertex3f(0,0,20);
+	//*/
 
 	/*
 	// draw particle (points)
