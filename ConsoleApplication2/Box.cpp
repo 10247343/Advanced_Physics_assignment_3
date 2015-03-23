@@ -2,17 +2,10 @@
 
 Box::Box()
 {
-	printf("empty box\n\n");
-
+	printf("empty box\n");
+	body = new cyclone::RigidBody();
 	//body = new cyclone::RigidBody();
 	//createBox(*new cyclone::Vector3(0,0,0), 2.2);
-}
-
-Box::Box(cyclone::Vector3 position, double mass)
-{
-	//createBox(position,mass);
-	body = new cyclone::RigidBody();
-	createBox(position, mass);
 }
 
 Box::~Box()
@@ -25,9 +18,9 @@ Box::~Box()
 void Box::createBox(cyclone::Vector3 position, double mass)
 {	
 	body->setPosition(position);
-    body->setOrientation(*new cyclone::Quaternion());
-    body->setVelocity(*new cyclone::Vector3());
-    body->setRotation(*new cyclone::Vector3());
+    body->setOrientation(cyclone::Quaternion());
+    body->setVelocity(cyclone::Vector3());
+    body->setRotation(cyclone::Vector3());
     halfSize = cyclone::Vector3(SIZE/2, SIZE/2, SIZE/2);
 
     body->setMass(mass);
@@ -47,7 +40,6 @@ void Box::createBox(cyclone::Vector3 position, double mass)
 	
     body->calculateDerivedData();
 
-	// hier weet hij alles nog
 	calculateInternals();
 	/*
 	//*/
@@ -107,6 +99,34 @@ void Box::createBox(cyclone::Vector3 position, double mass)
 		//world->getContactGenerators().push_back(&ribs[i]);
 	}
 	printf("ribs added: %d", j);
+	//*/
+}
+
+//*/
+void Box::render()
+{
+	//*
+	GLfloat mat[16];
+	body->getGLTransform(mat);
+
+	if(body->getAwake()) glColor3f(1.0f,0.0f,0.0f);
+	else glColor3f(0.0f,0.0f,1.0f);
+
+	glPushMatrix();
+	glMultMatrixf(mat);
+	glScalef(halfSize.x*2,halfSize.y*2,halfSize.z*2);
+	glutSolidCube(1.0f);
+	glPopMatrix();
+	/*/
+	glBegin(GL_LINES);
+	glVertex3f(body->getPosition().x-1,0,0);
+	glVertex3f(body->getPosition().x+1,0,0);
+	glVertex3f(0,0,body->getPosition().z-1);
+	glVertex3f(0,0,body->getPosition().z+1);
+	glVertex3f(0,body->getPosition().y-1,0);
+	glVertex3f(0,body->getPosition().y+1,0);
+	glEnd();
+	//printf("done drawing\n");
 	//*/
 }
 

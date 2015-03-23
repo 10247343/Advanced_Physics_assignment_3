@@ -54,7 +54,7 @@ private:
 	cyclone::real bulletAcceleration;
 	cyclone::Particle* particles;
 	cyclone::ParticleRod* rods;
-	cyclone::ParticleWorld* world;
+	//cyclone::World* world;
 	cyclone::Vector3 lookTo;
 
 	void ShootBox();

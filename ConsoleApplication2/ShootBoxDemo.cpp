@@ -6,7 +6,7 @@ ShootBoxDemo::ShootBoxDemo()
 	//world = new cyclone::ParticleWorld(40);
 	//cyclone::World* w = new cyclone::World(40);
 	
-
+	//world = new cyclone::World(80);
 	boxes = new Box[NUMBER_OF_BOXES];
 
 	bulletAcceleration = cyclone::real(5000.0f);
@@ -14,12 +14,16 @@ ShootBoxDemo::ShootBoxDemo()
 	//*
 	for(int i = 0; i < NUMBER_OF_BOXES - 1; i++)
 	{
-		cyclone::Vector3 position = *new cyclone::Vector3(-20,(SIZE+0.1)*((int)(i/4)),(SIZE+0.1)*(i%4));
+		cyclone::Vector3 position = cyclone::Vector3(-20,(SIZE+0.1)*((int)(i/4)),(SIZE+0.1)*(i%4));
+		//cyclone::Vector3 position = *new cyclone::Vector3(0,(SIZE)*((int)(i/4)),(SIZE)*(i%4));
+		//cyclone::Vector3 position = cyclone::Vector3(0,(SIZE+0.1)*((int)(i/4)),(SIZE+0.1)*(i%4));
 		
-		boxes[i] = *new Box(position, 2.2);
+		boxes[i].createBox(position, 2.2);
+		//= *new Box(position, 2.2);
 	}
 
-	boxes[NUMBER_OF_BOXES - 1] = *new Box(cyclone::Vector3(0, 0, 0), 2.2);
+	//boxes[NUMBER_OF_BOXES - 1] = *new Box(cyclone::Vector3(0, 0, 0), 2.2);
+	boxes[NUMBER_OF_BOXES - 1].createBox(cyclone::Vector3(0, 0, 0), 2.2);
 	bulletBox = boxes + (NUMBER_OF_BOXES - 1);
 	bulletShot = false;
 
@@ -47,6 +51,33 @@ void ShootBoxDemo::generateContacts()
     cData.restitution = (cyclone::real)0.6;
     cData.tolerance = (cyclone::real)0.1;
 
+	//*
+	// Perform exhaustive collision detection on the ground plane
+    cyclone::Matrix4 transform, otherTransform;
+    cyclone::Vector3 position, otherPosition;
+    for (Box *box = boxes; box < boxes+NUMBER_OF_BOXES; box++)
+    {
+        // Check for collisions with the ground plane
+        if (!cData.hasMoreContacts()) return;
+        cyclone::CollisionDetector::boxAndHalfSpace(*box, plane, &cData);
+
+        cyclone::CollisionSphere boxSphere = box->getCollisionSphere();
+
+        // Check for collisions with each other box
+        for (Box *other = box+1; other < boxes+NUMBER_OF_BOXES; other++)
+        {
+            if (!cData.hasMoreContacts()) return;
+
+            cyclone::CollisionSphere otherSphere = other->getCollisionSphere();
+
+            cyclone::CollisionDetector::sphereAndSphere(
+                boxSphere,
+                otherSphere,
+                &cData
+                );
+        }
+    }
+	//*/
 }
 
 void ShootBoxDemo::reset()
@@ -57,7 +88,13 @@ void ShootBoxDemo::reset()
 
 void ShootBoxDemo::updateObjects(cyclone::real duration)
 {
-    
+    for (Box *box = boxes; box < boxes+NUMBER_OF_BOXES; box++)
+    {
+        box->body->integrate(duration);
+        box->calculateInternals();
+    }
+
+	//world->runPhysics(duration);
 }
 
 void ShootBoxDemo::initGraphics()
@@ -88,7 +125,8 @@ void ShootBoxDemo::update()
 
 	//world->runPhysics(timepast);
 
-	Application::update();
+	RigidBodyApplication::update();
+	//Application::update();
 }
 
 /** draw the world */
@@ -172,6 +210,7 @@ void ShootBoxDemo::display()
 /** key handler */
 void ShootBoxDemo::key(unsigned char key)
 {
+	RigidBodyApplication::key(key);
     switch(key)
     {
 	case '-': printf( "mass down"); break;
@@ -180,6 +219,7 @@ void ShootBoxDemo::key(unsigned char key)
 	case 'r': printf( "retry game"); break;
 	case 32: printf( "shoot"); ShootBox(); break;
     }
+	
 }
 
 void ShootBoxDemo::mouseDrag(int x, int y)

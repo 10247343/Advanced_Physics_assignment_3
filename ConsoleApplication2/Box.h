@@ -16,7 +16,6 @@ class Box : public cyclone::CollisionBox
 
 public:
 	Box();
-	Box(cyclone::Vector3 position, double mass);
 	virtual ~Box();
 
 	void createBox(cyclone::Vector3 position, double mass);
@@ -33,35 +32,10 @@ public:
 	sphere.calculateInternals();
 	return sphere;
 }
-	//*/
-	void render()
-	{
-		//*
-		GLfloat mat[16];
-		body->getGLTransform(mat);
-
-		if(body->getAwake()) glColor3f(1.0f,0.0f,0.0f);
-		else glColor3f(0.0f,0.0f,1.0f);
-
-		glPushMatrix();
-		glMultMatrixf(mat);
-		glScalef(halfSize.x*2,halfSize.y*2,halfSize.z*2);
-		glutSolidCube(1.0f);
-		glPopMatrix();
-		//*/
-		glBegin(GL_LINES);
-		glVertex3f(body->getPosition().x-1,0,0);
-		glVertex3f(body->getPosition().x+1,0,0);
-		glVertex3f(0,0,body->getPosition().z-1);
-		glVertex3f(0,0,body->getPosition().z+1);
-		glVertex3f(0,body->getPosition().y-1,0);
-		glVertex3f(0,body->getPosition().y+1,0);
-		glEnd();
-		//printf("done drawing\n");
-
-	}
+	
 
 	/** Render the box */
+	void render();
 	virtual void display();
 
 	// getters and setters
