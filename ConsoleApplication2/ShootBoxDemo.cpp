@@ -9,13 +9,21 @@ ShootBoxDemo::ShootBoxDemo()
 
 	boxes = new Box[NUMBER_OF_BOXES];
 
+	bulletAcceleration = cyclone::real(5000.0f);
+
 	//*
-	for(int i = 0; i < NUMBER_OF_BOXES; i++)
+	for(int i = 0; i < NUMBER_OF_BOXES - 1; i++)
 	{
-		cyclone::Vector3 position = *new cyclone::Vector3(0,(SIZE+0.1)*((int)(i/4)),(SIZE+0.1)*(i%4));
+		cyclone::Vector3 position = *new cyclone::Vector3(-20,(SIZE+0.1)*((int)(i/4)),(SIZE+0.1)*(i%4));
 		
 		boxes[i] = *new Box(position, 2.2);
 	}
+
+	boxes[NUMBER_OF_BOXES - 1] = *new Box(cyclone::Vector3(0, 0, 0), 2.2);
+	bulletBox = boxes + (NUMBER_OF_BOXES - 1);
+	bulletShot = false;
+
+	lookTo = cyclone::Vector3(-1, 0, 0);
 	//*/
 }
 
@@ -125,7 +133,7 @@ void ShootBoxDemo::display()
     glBegin(GL_LINES);
 
     glColor3f(1, 0, 0);
-    glVertex3f(lookTo.x, lookTo.y, lookTo.z);
+    glVertex3f(0, 0, 0);
     cyclone::Vector3 temp(lookTo * 10);
     glVertex3f(temp.x, temp.y, temp.z);
 	/*
@@ -170,7 +178,7 @@ void ShootBoxDemo::key(unsigned char key)
 	case '+': printf( "mass up"); break;
 	case 'n': printf( "new game"); break;
 	case 'r': printf( "retry game"); break;
-	case 32: printf( "shoot"); break;
+	case 32: printf( "shoot"); ShootBox(); break;
     }
 }
 
@@ -184,7 +192,11 @@ void ShootBoxDemo::mouseDrag(int x, int y)
 
 void ShootBoxDemo::ShootBox()
 {
-	
+	//Early out.
+	if (!bulletBox || bulletShot)
+		return;
+
+	bulletBox->body->setAcceleration(lookTo * bulletAcceleration);
 }
 
 cyclone::real ShootBoxDemo::GetRad(cyclone::real degrees)
@@ -202,9 +214,9 @@ cyclone::Matrix3 ShootBoxDemo::RotateZ(cyclone::real degrees)
 	[       0,         0, 1]
 	*/
 	return cyclone::Matrix3(
-		real_cos(rad), -real_sin(rad), 0,
-		real_sin(rad), real_cos(rad), 0,
-		0, 0, 1); 
+		real_cos(rad),	-real_sin(rad),	0,
+		real_sin(rad),	real_cos(rad),	0,
+		0,				0,				1); 
 }
 
 cyclone::Matrix3 ShootBoxDemo::RotateY(cyclone::real degrees)
@@ -217,7 +229,7 @@ cyclone::Matrix3 ShootBoxDemo::RotateY(cyclone::real degrees)
 	[-sin(rad), 0, cos(rad)]
 	*/
 	return cyclone::Matrix3(
-		real_cos(rad), 0, real_sin(rad),
-		0, 1, 0,
-		-real_sin(rad), 0, real_cos(rad)); 
+		real_cos(rad),	0,	real_sin(rad),
+		0,				1,	0,
+		-real_sin(rad),	0,	real_cos(rad)); 
 }

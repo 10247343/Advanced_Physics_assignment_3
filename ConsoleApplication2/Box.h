@@ -11,7 +11,7 @@
 #define RIB_COUNT 12
 #define SIZE 2
 
-class Box : cyclone::CollisionBox
+class Box : public cyclone::CollisionBox
 {
 
 public:

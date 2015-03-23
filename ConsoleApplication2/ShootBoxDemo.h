@@ -10,7 +10,7 @@
 
 #include "Box.h"
 
-#define NUMBER_OF_BOXES 16
+#define NUMBER_OF_BOXES 17
 #define PARTICLE_COUNT 8
 #define ROD_COUNT 12
 
@@ -49,6 +49,9 @@ public:
 
 private:
 	Box* boxes;
+	Box* bulletBox;
+	bool bulletShot;
+	cyclone::real bulletAcceleration;
 	cyclone::Particle* particles;
 	cyclone::ParticleRod* rods;
 	cyclone::ParticleWorld* world;
