@@ -79,7 +79,6 @@ void ShootBoxDemo::update()
 	if (timepast <= 0.0f) return;
 
 	//world->runPhysics(timepast);
-	
 
 	Application::update();
 }
@@ -125,6 +124,10 @@ void ShootBoxDemo::display()
     glDisable(GL_DEPTH_TEST);
     glBegin(GL_LINES);
 
+    glColor3f(1, 0, 0);
+    glVertex3f(lookTo.x, lookTo.y, lookTo.z);
+    cyclone::Vector3 temp(lookTo * 10);
+    glVertex3f(temp.x, temp.y, temp.z);
 	/*
 	glVertex3f(-20,0,0);
     glVertex3f(20,0,0);
@@ -171,4 +174,50 @@ void ShootBoxDemo::key(unsigned char key)
     }
 }
 
+void ShootBoxDemo::mouseDrag(int x, int y)
+{
+	RigidBodyApplication::mouseDrag(x, y);
 
+	//Update the lookTo for aiming the box.
+	lookTo = RotateZ(phi) * RotateY(theta) * cyclone::Vector3(-1, 0, 0);
+}
+
+void ShootBoxDemo::ShootBox()
+{
+	
+}
+
+cyclone::real ShootBoxDemo::GetRad(cyclone::real degrees)
+{
+	return degrees / cyclone::real(180.0f) * R_PI;
+}
+
+cyclone::Matrix3 ShootBoxDemo::RotateZ(cyclone::real degrees)
+{
+	cyclone::real rad(GetRad(degrees));
+	/*
+	Rotation matrix around Z axis.
+	[cos(rad), -sin(rad), 0]
+	[sin(rad),  cos(rad), 0]
+	[       0,         0, 1]
+	*/
+	return cyclone::Matrix3(
+		real_cos(rad), -real_sin(rad), 0,
+		real_sin(rad), real_cos(rad), 0,
+		0, 0, 1); 
+}
+
+cyclone::Matrix3 ShootBoxDemo::RotateY(cyclone::real degrees)
+{
+	cyclone::real rad(GetRad(-degrees));
+	/*
+	Rotation matrix around Y axis.
+	[ cos(rad), 0, sin(rad)]
+	[        0, 1,        0]
+	[-sin(rad), 0, cos(rad)]
+	*/
+	return cyclone::Matrix3(
+		real_cos(rad), 0, real_sin(rad),
+		0, 1, 0,
+		-real_sin(rad), 0, real_cos(rad)); 
+}

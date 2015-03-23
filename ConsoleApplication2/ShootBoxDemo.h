@@ -45,12 +45,19 @@ public:
     virtual void reset();
 	/** Sets up the rendering. */
     virtual void initGraphics();
+    virtual void mouseDrag(int x, int y);
 
 private:
 	Box* boxes;
 	cyclone::Particle* particles;
 	cyclone::ParticleRod* rods;
 	cyclone::ParticleWorld* world;
+	cyclone::Vector3 lookTo;
+
+	void ShootBox();
+	cyclone::real GetRad(cyclone::real degrees);
+	cyclone::Matrix3 RotateZ(cyclone::real degrees);
+	cyclone::Matrix3 RotateY(cyclone::real degrees);
 };
 
 
