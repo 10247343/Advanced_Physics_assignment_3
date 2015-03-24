@@ -47,10 +47,14 @@ public:
     virtual void initGraphics();
     virtual void mouseDrag(int x, int y);
 
+	virtual void newgame();
+
 private:
 	Box* boxes;
 	Box* bulletBox;
 	bool bulletShot;
+	double* massReset;
+	double shotMass;
 	cyclone::real bulletAcceleration;
 	cyclone::Particle* particles;
 	cyclone::ParticleRod* rods;

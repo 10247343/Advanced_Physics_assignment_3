@@ -18,7 +18,7 @@ public:
 	Box();
 	virtual ~Box();
 
-	void createBox(cyclone::Vector3 position, double mass);
+	void setBox(cyclone::Vector3 position, double mass);
 
 	//*
 	cyclone::CollisionSphere getCollisionSphere() const
@@ -32,7 +32,16 @@ public:
 	sphere.calculateInternals();
 	return sphere;
 }
-	
+
+	cyclone::CollisionBox getCollisionBox() const
+	{
+		cyclone::CollisionBox cbox;
+		cbox.body = body;
+		
+		cbox.offset = cyclone::Matrix4();
+		cbox.calculateInternals();
+		return cbox;
+	}
 
 	/** Render the box */
 	void render();

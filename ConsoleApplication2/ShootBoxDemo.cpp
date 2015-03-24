@@ -8,27 +8,8 @@ ShootBoxDemo::ShootBoxDemo()
 	
 	//world = new cyclone::World(80);
 	boxes = new Box[NUMBER_OF_BOXES];
-
-	bulletAcceleration = cyclone::real(5000.0f);
-
-	//*
-	for(int i = 0; i < NUMBER_OF_BOXES - 1; i++)
-	{
-		cyclone::Vector3 position = cyclone::Vector3(-20,(SIZE+0.1)*((int)(i/4)),(SIZE+0.1)*(i%4));
-		//cyclone::Vector3 position = *new cyclone::Vector3(0,(SIZE)*((int)(i/4)),(SIZE)*(i%4));
-		//cyclone::Vector3 position = cyclone::Vector3(0,(SIZE+0.1)*((int)(i/4)),(SIZE+0.1)*(i%4));
-		
-		boxes[i].createBox(position, 2.2);
-		//= *new Box(position, 2.2);
-	}
-
-	//boxes[NUMBER_OF_BOXES - 1] = *new Box(cyclone::Vector3(0, 0, 0), 2.2);
-	boxes[NUMBER_OF_BOXES - 1].createBox(cyclone::Vector3(0, 0, 0), 2.2);
-	bulletBox = boxes + (NUMBER_OF_BOXES - 1);
-	bulletShot = false;
-
-	lookTo = cyclone::Vector3(-1, 0, 0);
-	//*/
+	massReset = new double[NUMBER_OF_BOXES];
+	newgame();
 }
 
 /** HammockDemo destructor function, clearing all particle arrays */
@@ -61,20 +42,35 @@ void ShootBoxDemo::generateContacts()
         if (!cData.hasMoreContacts()) return;
         cyclone::CollisionDetector::boxAndHalfSpace(*box, plane, &cData);
 
-        cyclone::CollisionSphere boxSphere = box->getCollisionSphere();
+//        cyclone::CollisionSphere boxSphere = box->getCollisionSphere();
 
         // Check for collisions with each other box
         for (Box *other = box+1; other < boxes+NUMBER_OF_BOXES; other++)
         {
+			//box collision
+			//*
+            if (!cData.hasMoreContacts()) return;
+            cyclone::CollisionDetector::boxAndBox(*box, *other, &cData);
+			//*/
+
+			/*
             if (!cData.hasMoreContacts()) return;
 
             cyclone::CollisionSphere otherSphere = other->getCollisionSphere();
+			
+			cyclone::CollisionDetector::boxAndBox(
+				box,
+				other,
+				&cData
+				);
 
+			
             cyclone::CollisionDetector::sphereAndSphere(
                 boxSphere,
                 otherSphere,
                 &cData
                 );
+			//*/
         }
     }
 	//*/
@@ -84,6 +80,44 @@ void ShootBoxDemo::reset()
 {
     // Reset the contacts
     cData.contactCount = 0;
+
+	printf("reset function\n");
+	for(int i = 0; i < NUMBER_OF_BOXES-1; i++)
+	{
+		//cyclone::Vector3 position = cyclone::Vector3(-20,(SIZE+0.1)*((int)(i/4)),(SIZE+0.1)*(i%4));
+		cyclone::Vector3 position = cyclone::Vector3(-20,(SIZE)*((int)(i/4)),(SIZE)*(i%4));
+		//cyclone::Vector3 position = cyclone::Vector3(-20,(SIZE-0.1)*((int)(i/4)),(SIZE-0.1)*(i%4));
+
+		boxes[i].setBox(position, massReset[i]);
+	}
+	boxes[NUMBER_OF_BOXES-1].setBox(cyclone::Vector3(0,0,0),shotMass);
+}
+
+void ShootBoxDemo::newgame()
+{
+	pauseSimulation = false;
+	shotMass = 2.2;
+	bulletAcceleration = cyclone::real(5000.0f);
+
+	//*
+	for(int i = 0; i < NUMBER_OF_BOXES - 1; i++)
+	{
+		//cyclone::Vector3 position = cyclone::Vector3(-20,(SIZE+0.1)*((int)(i/4)),(SIZE+0.1)*(i%4));
+		cyclone::Vector3 position = cyclone::Vector3(-20,(SIZE)*((int)(i/4)),(SIZE)*(i%4));
+		//cyclone::Vector3 position = cyclone::Vector3(-20,(SIZE-0.1)*((int)(i/4)),(SIZE-0.1)*(i%4));
+		double mass = cyclone::Random().randomReal()*3.0;
+
+		massReset[i] = mass;
+		boxes[i].setBox(position, mass);
+	}
+
+	//boxes[NUMBER_OF_BOXES - 1] = *new Box(cyclone::Vector3(0, 0, 0), 2.2);
+	boxes[NUMBER_OF_BOXES - 1].setBox(cyclone::Vector3(0, 0, 0), shotMass);
+	bulletBox = boxes + (NUMBER_OF_BOXES - 1);
+	bulletShot = false;
+
+	lookTo = cyclone::Vector3(-1, 0, 0);
+	//*/
 }
 
 void ShootBoxDemo::updateObjects(cyclone::real duration)
@@ -213,11 +247,11 @@ void ShootBoxDemo::key(unsigned char key)
 	RigidBodyApplication::key(key);
     switch(key)
     {
-	case '-': printf( "mass down"); break;
-	case '+': printf( "mass up"); break;
-	case 'n': printf( "new game"); break;
-	case 'r': printf( "retry game"); break;
-	case 32: printf( "shoot"); ShootBox(); break;
+	case '+': printf( "mass up:%f\n",shotMass);shotMass += 0.1; break;
+	case '-': printf( "mass down:%f\n",shotMass);shotMass -= 0.1; break;
+	case 'n': printf( "new game\n"); newgame(); break;
+	case 'r': printf( "retry game\n"); break;
+	case 32: printf( "shoot\n"); ShootBox(); break;
     }
 	
 }

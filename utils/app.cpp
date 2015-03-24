@@ -317,10 +317,10 @@ void RigidBodyApplication::key(unsigned char key)
         pauseSimulation = !pauseSimulation;
         return;
 
-    case ' ':
+    //case ' ':
         // Advance one frame
-        autoPauseSimulation = true;
-        pauseSimulation = false;
+        //autoPauseSimulation = true;
+        //pauseSimulation = false;
     }
 
     Application::key(key);

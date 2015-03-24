@@ -15,7 +15,7 @@ Box::~Box()
 	delete body;
 }
 
-void Box::createBox(cyclone::Vector3 position, double mass)
+void Box::setBox(cyclone::Vector3 position, double mass)
 {	
 	body->setPosition(position);
     body->setOrientation(cyclone::Quaternion());
