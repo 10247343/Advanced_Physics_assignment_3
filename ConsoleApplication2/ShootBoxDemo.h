@@ -1,8 +1,7 @@
-#ifndef HAMMOCK_INCLUDED
-#define HAMMOCK_INCLUDED
+#ifndef SHOOTBOX_INCLUDED
+#define SHOOTBOX_INCLUDED
 
 #include <cyclone/cyclone.h>
-#include <cyclone/world.h>
 
 #include "../utils/app.h"
 #include "../utils/timing.h"
@@ -10,16 +9,8 @@
 
 #include "Box.h"
 
-#define NUMBER_OF_BOXES 17
-#define PARTICLE_COUNT 8
-#define ROD_COUNT 12
-
-#define PARTICLE_MASS 1
-
-#define MASSOBJECT_MASS 50
-#if PARTICLE_COUNT % 2 == 0
-#define NUMBER_OF_QUADRILATERALS (PARTICLE_COUNT - 2) / 2
-#endif
+#define NUMBER_OF_BOXES 16
+#define TIME_BETWEEN_SHOTS 4.0f
 
 class ShootBoxDemo : public RigidBodyApplication
 {
@@ -28,6 +19,9 @@ public:
 	/** constructor and destructor */
 	ShootBoxDemo();
 	virtual ~ShootBoxDemo();
+
+	/** remove boxes from vector from back till given index*/
+	void DeleteBoxes(int index = 0);
 
 	/** Return the title of the assignment */
 	virtual const char* getTitle();
@@ -47,25 +41,29 @@ public:
     virtual void initGraphics();
     virtual void mouseDrag(int x, int y);
 
+	/** Function to start a new game with new masses */
 	virtual void newgame();
 
 private:
-	Box* boxes;
+	std::vector<Box*> boxes;
 	Box* bulletBox;
 	bool bulletShot;
+	float shotTimer;
 	double* massReset;
 	double shotMass;
 	cyclone::real bulletAcceleration;
-	cyclone::Particle* particles;
-	cyclone::ParticleRod* rods;
-	//cyclone::World* world;
 	cyclone::Vector3 lookTo;
 
+	/** Shoots the box by giving it force */
 	void ShootBox();
+	/** Quick function for converting degrees into radians */
 	cyclone::real GetRad(cyclone::real degrees);
+	/** Quick function for rotating around the Z-axis with a certain degrees */
 	cyclone::Matrix3 RotateZ(cyclone::real degrees);
+	/** Quick function for rotating around the Y-axis with a certain degrees */
 	cyclone::Matrix3 RotateY(cyclone::real degrees);
 
+	/** Renders the text required for this application */
 	void RenderText();
 };
 

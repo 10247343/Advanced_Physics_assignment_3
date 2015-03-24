@@ -5,21 +5,23 @@
 
 ShootBoxDemo::ShootBoxDemo()
 {
-	//*
-	//world = new cyclone::ParticleWorld(40);
-	//cyclone::World* w = new cyclone::World(40);
-	
-	//world = new cyclone::World(80);
-	boxes = new Box[NUMBER_OF_BOXES];
 	massReset = new double[NUMBER_OF_BOXES];
 	newgame();
 }
 
-/** HammockDemo destructor function, clearing all particle arrays */
+/** ShootBoxDemo destructor function */
 ShootBoxDemo::~ShootBoxDemo()
 {
-	if (particles) delete[] particles;
-	if (rods) delete[] rods;
+	DeleteBoxes();
+}
+
+void ShootBoxDemo::DeleteBoxes(int index)
+{
+	// free the boxes memory and pop from back
+	while(boxes.size() > index){
+		delete boxes[boxes.size()-1];
+		boxes.pop_back();
+	}
 }
 
 void ShootBoxDemo::generateContacts()
@@ -35,48 +37,25 @@ void ShootBoxDemo::generateContacts()
     cData.restitution = (cyclone::real)0.6;
     cData.tolerance = (cyclone::real)0.1;
 
-	//*
+	
 	// Perform exhaustive collision detection on the ground plane
     cyclone::Matrix4 transform, otherTransform;
     cyclone::Vector3 position, otherPosition;
-    for (Box *box = boxes; box < boxes+NUMBER_OF_BOXES; box++)
+	// pick a box
+	for(std::vector<Box*>::iterator box = boxes.begin(); box != boxes.end(); ++box )
     {
         // Check for collisions with the ground plane
         if (!cData.hasMoreContacts()) return;
-        cyclone::CollisionDetector::boxAndHalfSpace(*box, plane, &cData);
+        cyclone::CollisionDetector::boxAndHalfSpace(*box[0], plane, &cData);
 
-//        cyclone::CollisionSphere boxSphere = box->getCollisionSphere();
-
-        // Check for collisions with each other box
-        for (Box *other = box+1; other < boxes+NUMBER_OF_BOXES; other++)
+        // Check for collisions with the other boxes that are still remaining for check
+		for(std::vector<Box*>::iterator other = box+1; other != boxes.end(); ++other )
         {
 			//box collision
-			//*
             if (!cData.hasMoreContacts()) return;
-            cyclone::CollisionDetector::boxAndBox(*box, *other, &cData);
-			//*/
-
-			/*
-            if (!cData.hasMoreContacts()) return;
-
-            cyclone::CollisionSphere otherSphere = other->getCollisionSphere();
-			
-			cyclone::CollisionDetector::boxAndBox(
-				box,
-				other,
-				&cData
-				);
-
-			
-            cyclone::CollisionDetector::sphereAndSphere(
-                boxSphere,
-                otherSphere,
-                &cData
-                );
-			//*/
+            cyclone::CollisionDetector::boxAndBox(*box[0], *other[0], &cData);
         }
     }
-	//*/
 }
 
 void ShootBoxDemo::reset()
@@ -84,58 +63,67 @@ void ShootBoxDemo::reset()
     // Reset the contacts
     cData.contactCount = 0;
 
-	printf("reset function\n");
-	for(int i = 0; i < NUMBER_OF_BOXES-1; i++)
-	{
-		//cyclone::Vector3 position = cyclone::Vector3(-20,(SIZE+0.1)*((int)(i/4)),(SIZE+0.1)*(i%4));
-		cyclone::Vector3 position = cyclone::Vector3(-20,(SIZE)*((int)(i/4)),(SIZE)*(i%4));
-		//cyclone::Vector3 position = cyclone::Vector3(-20,(SIZE-0.1)*((int)(i/4)),(SIZE-0.1)*(i%4));
+	// set timer back to 0
+	shotTimer = 0.0f;
 
-		boxes[i].setBox(position, massReset[i]);
+	// clear memory
+	DeleteBoxes(NUMBER_OF_BOXES + 1);
+
+	printf("reset function\n");
+	for(int i = 0; i < NUMBER_OF_BOXES; i++)
+	{
+		cyclone::Vector3 position = cyclone::Vector3(-20,(SIZE+0.01)*((int)(i/4)),(SIZE+0.01)*(i%4));
+		// massReset[i] holds the mass of the box so the game will be the same
+		boxes[i]->setBox(position, massReset[i]);
 	}
-	boxes[NUMBER_OF_BOXES-1].setBox(cyclone::Vector3(0,0,0),shotMass);
+	boxes[NUMBER_OF_BOXES]->setBox(cyclone::Vector3(0,0,0),shotMass);
+	bulletShot = false;
 }
 
 void ShootBoxDemo::newgame()
 {
-	pauseSimulation = false;
+	printf("Start new game\n");
+	pauseSimulation = false; // start simulation
 	shotMass = 2.2;
 	bulletAcceleration = cyclone::real(5000.0f);
+	shotTimer = 0.0f;
 
-	//*
-	for(int i = 0; i < NUMBER_OF_BOXES - 1; i++)
+	// If boxes vector is not empty clear vector before new game
+	if(!boxes.empty())
 	{
-		//cyclone::Vector3 position = cyclone::Vector3(-20,(SIZE+0.1)*((int)(i/4)),(SIZE+0.1)*(i%4));
-		cyclone::Vector3 position = cyclone::Vector3(-20,(SIZE)*((int)(i/4)),(SIZE)*(i%4));
-		//cyclone::Vector3 position = cyclone::Vector3(-20,(SIZE-0.1)*((int)(i/4)),(SIZE-0.1)*(i%4));
-		double mass = cyclone::Random().randomReal()*3.0;
-
-		massReset[i] = mass;
-		boxes[i].setBox(position, mass);
+		DeleteBoxes();
 	}
 
-	//boxes[NUMBER_OF_BOXES - 1] = *new Box(cyclone::Vector3(0, 0, 0), 2.2);
-	boxes[NUMBER_OF_BOXES - 1].setBox(cyclone::Vector3(0, 0, 0), shotMass);
-	bulletBox = boxes + (NUMBER_OF_BOXES - 1);
+	for(int i = 0; i < NUMBER_OF_BOXES; i++)
+	{
+		cyclone::Vector3 position = cyclone::Vector3(-20,(SIZE+0.01)*((int)(i/4)),(SIZE+0.01)*(i%4));
+		double mass = cyclone::Random().randomReal()*5.0 + 3;
+
+		// store the max of the box for reset
+		massReset[i] = mass;
+		boxes.push_back(new Box());
+		boxes[i]->setBox(position, mass);
+	}
+
+	boxes.push_back(new Box());
+	boxes[NUMBER_OF_BOXES]->setBox(cyclone::Vector3(0, 0, 0), shotMass);
 	bulletShot = false;
 
 	lookTo = cyclone::Vector3(-1, 0, 0);
-	//*/
 }
 
 void ShootBoxDemo::updateObjects(cyclone::real duration)
 {
-    for (Box *box = boxes; box < boxes+NUMBER_OF_BOXES; box++)
+	for(std::vector<Box*>::iterator box = boxes.begin(); box != boxes.end(); ++box )
     {
-        box->body->integrate(duration);
-        box->calculateInternals();
+        box[0]->body->integrate(duration);
+        box[0]->calculateInternals();
     }
-
-	//world->runPhysics(duration);
 }
 
 void ShootBoxDemo::initGraphics()
 {
+	// placing a light in the world
     GLfloat lightAmbient[] = {0.8f,0.8f,0.8f,1.0f};
     GLfloat lightDiffuse[] = {0.9f,0.95f,1.0f,1.0f};
 
@@ -160,30 +148,32 @@ void ShootBoxDemo::update()
 	float timepast = (float)TimingData::get().lastFrameDuration * 0.001f;
 	if (timepast <= 0.0f) return;
 
-	//world->runPhysics(timepast);
+	// bullet is shot we have to start a timer to spawn a new bulletBox
+	if (bulletShot)
+	{
+		shotTimer += timepast;
+		if (shotTimer >= TIME_BETWEEN_SHOTS)
+		{
+			bulletShot = false;
+			shotTimer = 0.0f;
+			Box* box(new Box());
+			box->setBox(cyclone::Vector3(0, 0, 0), shotMass);
+			boxes.push_back(box);
+		}
+	}
 
 	RigidBodyApplication::update();
-	//Application::update();
 }
 
 /** draw the world */
 void ShootBoxDemo::display()
 {
-	/*
-	// clear buffers
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// place camera
-	glLoadIdentity();
-	gluLookAt(0.0, 0.0, -10.0,
-		0.0, 0.0, 0.0,
-		0.0, 1.0, 0.0);
-	//*/
 	const static GLfloat lightPosition[] = {0.7f,-1,0.4f,0};
     const static GLfloat lightPositionMirror[] = {0.7f,1,0.4f,0};
 
     RigidBodyApplication::display();
 
-	// Render the bones
+	// Render the boxes
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -194,10 +184,9 @@ void ShootBoxDemo::display()
 
     glEnable(GL_NORMALIZE);
     glColor3f(1,0,0);
-    for(int i = 0; i < NUMBER_OF_BOXES; i++)
+	for(std::vector<Box*>::iterator box = boxes.begin(); box != boxes.end(); ++box )
 	{
-		//boxes[i].display();
-		boxes[i].render();
+		box[0]->render();
 	}
     glDisable(GL_NORMALIZE);
 
@@ -239,7 +228,7 @@ void ShootBoxDemo::key(unsigned char key)
 	case '-': printf( "mass down:%f\n",shotMass);shotMass -= 0.1; break;
 	case 'n': printf( "new game\n"); newgame(); break;
 	case 'r': printf( "retry game\n"); break;
-	case 32: printf( "shoot\n"); ShootBox(); break;
+	case 32: printf( "shoot\n");boxes[boxes.size() - 1]->body->setMass(shotMass); ShootBox(); break;
     }
 	
 }
@@ -249,20 +238,26 @@ void ShootBoxDemo::mouseDrag(int x, int y)
 	RigidBodyApplication::mouseDrag(x, y);
 
 	//Update the lookTo for aiming the box.
+	//Use the phi and theta which is also used for the camera's rotation.
 	lookTo = RotateZ(phi) * RotateY(theta) * cyclone::Vector3(-1, 0, 0);
 }
 
 void ShootBoxDemo::ShootBox()
 {
-	//Early out.
-	if (!bulletBox || bulletShot)
+	//Early out if we're not allowed to shoot yet.
+	if (bulletShot)
 		return;
+	bulletShot = true;
 
-	bulletBox->body->addForce(lookTo * bulletAcceleration);
+	//Wake 'm up.
+	boxes[boxes.size()-1]->body->setAwake();
+	//Before you go go.
+	boxes[boxes.size()-1]->body->addForce(lookTo * bulletAcceleration);
 }
 
 cyclone::real ShootBoxDemo::GetRad(cyclone::real degrees)
 {
+	//rad = degrees / 180 * PI.
 	return degrees / cyclone::real(180.0f) * R_PI;
 }
 
@@ -275,10 +270,13 @@ cyclone::Matrix3 ShootBoxDemo::RotateZ(cyclone::real degrees)
 	[sin(rad),  cos(rad), 0]
 	[       0,         0, 1]
 	*/
+	cyclone::real cosResult(real_cos(rad));
+	cyclone::real sinResult(real_sin(rad));
+
 	return cyclone::Matrix3(
-		real_cos(rad),	-real_sin(rad),	0,
-		real_sin(rad),	real_cos(rad),	0,
-		0,				0,				1); 
+		cosResult,	-sinResult,	0,
+		sinResult,	cosResult,	0,
+		0,			0,			1); 
 }
 
 cyclone::Matrix3 ShootBoxDemo::RotateY(cyclone::real degrees)
@@ -290,8 +288,11 @@ cyclone::Matrix3 ShootBoxDemo::RotateY(cyclone::real degrees)
 	[        0, 1,        0]
 	[-sin(rad), 0, cos(rad)]
 	*/
+	cyclone::real cosResult(real_cos(rad));
+	cyclone::real sinResult(real_sin(rad));
+
 	return cyclone::Matrix3(
-		real_cos(rad),	0,	real_sin(rad),
-		0,				1,	0,
-		-real_sin(rad),	0,	real_cos(rad)); 
+		cosResult,	0,	sinResult,
+		0,			1,	0,
+		-sinResult,	0,	cosResult); 
 }

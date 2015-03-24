@@ -7,8 +7,7 @@
 #include "../utils/timing.h"
 #include "../utils/ogl_headers.h"
 
-#define CORNER_COUNT 8
-#define RIB_COUNT 12
+// Size of the sides of the box
 #define SIZE 2
 
 class Box : public cyclone::CollisionBox
@@ -18,46 +17,18 @@ public:
 	Box();
 	virtual ~Box();
 
+	/** Setting the propertys (location,mass,etc) */
 	void setBox(cyclone::Vector3 position, double mass);
-
-	//*
-	cyclone::CollisionSphere getCollisionSphere() const
-{
-	cyclone::CollisionSphere sphere;
-	sphere.body = body;
-	sphere.radius = halfSize.x;
-	sphere.offset = cyclone::Matrix4();
-	if(halfSize.y < sphere.radius) sphere.radius = halfSize.y;
-	if(halfSize.z < sphere.radius) sphere.radius = halfSize.z;
-	sphere.calculateInternals();
-	return sphere;
-}
-
-	cyclone::CollisionBox getCollisionBox() const
-	{
-		cyclone::CollisionBox cbox;
-		cbox.body = body;
-		
-		cbox.offset = cyclone::Matrix4();
-		cbox.calculateInternals();
-		return cbox;
-	}
 
 	/** Render the box */
 	void render();
-	virtual void display();
 
 	// getters and setters
 	double getMass() {return mass;}
-	cyclone::Particle* getCorners() {return corners;}
-	cyclone::ParticleRod* getRibs() {return ribs;}
-
 
 private:
-	//cyclone::RigidBody* body;
+	// mass of the box
 	int mass;
-	cyclone::Particle* corners;
-	cyclone::ParticleRod* ribs;
 };
 
 
