@@ -65,6 +65,8 @@ private:
 	cyclone::real GetRad(cyclone::real degrees);
 	cyclone::Matrix3 RotateZ(cyclone::real degrees);
 	cyclone::Matrix3 RotateY(cyclone::real degrees);
+
+	void RenderText();
 };
 
 

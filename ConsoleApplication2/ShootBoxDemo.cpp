@@ -1,5 +1,8 @@
 #include "ShootBoxDemo.h"
 
+#include <sstream>
+#include <string>
+
 ShootBoxDemo::ShootBoxDemo()
 {
 	//*
@@ -208,37 +211,22 @@ void ShootBoxDemo::display()
     glVertex3f(0, 0, 0);
     cyclone::Vector3 temp(lookTo * 10);
     glVertex3f(temp.x, temp.y, temp.z);
-	/*
-	glVertex3f(-20,0,0);
-    glVertex3f(20,0,0);
-    glVertex3f(0,0,-20);
-    glVertex3f(0,0,20);
-	//*/
-
-	/*
-	// draw particle (points)
-	glColor3f(1,0,0);
-	for(int i = 0; i < PARTICLE_COUNT; i++){
-		glPushMatrix();
-		cyclone::Vector3 position = particles[i].getPosition();
-		glTranslatef(position.x, position.y, position.z);
-		glutSolidSphere(0.1f, 10, 10);
-		glPopMatrix();
-	}
-	//*/
-
-	/*
-	// draw beem
-	glColor3f(1,0,0);
-    for (unsigned i = 0; i < ROD_COUNT; i++)
-    {
-        const cyclone::Vector3 &point1 = rods[i].particle[0]->getPosition();
-        const cyclone::Vector3 &point2 = rods[i].particle[1]->getPosition();
-        glVertex3f(point1.x, point1.y, point1.z);
-        glVertex3f(point2.x, point2.y, point2.z);
-    }
-	//*/
 	glEnd();
+
+	RenderText();
+}
+
+void ShootBoxDemo::RenderText()
+{
+	glColor3f(0.0f, 0.0f, 0.0f);
+	std::stringstream ss;
+	ss << "Hold left mouse button and drag the mouse to aim.\n";
+	ss << "Press R to reset with current values.\n";
+	ss << "Press N to start a game with new mass values.\n";
+	ss << "Press Space to shoot the bullet.\n";
+	ss << "Press + or - to increase or decrease the mass.\n";
+	ss << "Current mass: " << shotMass;
+	renderText(10.0f, 64.0f, ss.str().c_str());
 }
 
 /** key handler */
@@ -270,7 +258,7 @@ void ShootBoxDemo::ShootBox()
 	if (!bulletBox || bulletShot)
 		return;
 
-	bulletBox->body->setAcceleration(lookTo * bulletAcceleration);
+	bulletBox->body->addForce(lookTo * bulletAcceleration);
 }
 
 cyclone::real ShootBoxDemo::GetRad(cyclone::real degrees)
