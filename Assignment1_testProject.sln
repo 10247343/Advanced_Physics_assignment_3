@@ -10,6 +10,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConsoleApplication1", "Cons
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConsoleApplication2", "ConsoleApplication2\ConsoleApplication2.vcxproj", "{81ABC72D-938E-470F-961F-9BCEA6109B6D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DiceRolling", "DiceRolling\DiceRolling.vcxproj", "{E345371F-9577-4866-9A5F-E1F710F9D252}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,16 @@ Global
 		{81ABC72D-938E-470F-961F-9BCEA6109B6D}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{81ABC72D-938E-470F-961F-9BCEA6109B6D}.Release|Win32.ActiveCfg = Release|Win32
 		{81ABC72D-938E-470F-961F-9BCEA6109B6D}.Release|Win32.Build.0 = Release|Win32
+		{E345371F-9577-4866-9A5F-E1F710F9D252}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{E345371F-9577-4866-9A5F-E1F710F9D252}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{E345371F-9577-4866-9A5F-E1F710F9D252}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{E345371F-9577-4866-9A5F-E1F710F9D252}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E345371F-9577-4866-9A5F-E1F710F9D252}.Debug|Win32.Build.0 = Debug|Win32
+		{E345371F-9577-4866-9A5F-E1F710F9D252}.Release|Any CPU.ActiveCfg = Release|Win32
+		{E345371F-9577-4866-9A5F-E1F710F9D252}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{E345371F-9577-4866-9A5F-E1F710F9D252}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{E345371F-9577-4866-9A5F-E1F710F9D252}.Release|Win32.ActiveCfg = Release|Win32
+		{E345371F-9577-4866-9A5F-E1F710F9D252}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
