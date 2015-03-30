@@ -9,7 +9,7 @@
 
 // Size of the sides of the dice
 #define SIZE 1
-#define MASS 2
+#define MASS 10
 
 class Dice : public cyclone::CollisionBox
 {

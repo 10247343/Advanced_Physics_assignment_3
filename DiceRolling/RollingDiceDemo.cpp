@@ -48,10 +48,16 @@ void RollingDiceDemo::generateContacts()
         // Check for collisions with the ground plane
         if (!cData.hasMoreContacts()) return;
 		
+		//*
+		if(cyclone::CollisionDetector::sphereAndTruePlane(di[0]->getCollisionSphere(),plane, &cData) > 0){
+			if(cyclone::CollisionDetector::boxAndHalfSpace(*di[0], plane, &cData) > 0)
+				//*/
+		/*
         if(cyclone::CollisionDetector::boxAndHalfSpace(*di[0], plane, &cData) > 0){
 			if(cyclone::CollisionDetector::sphereAndTruePlane(di[0]->getCollisionSphere(),plane, &cData) > 0)
+				//*/
 			{
-
+				cData.contactCount -= 1;
 			}
 			else
 			{
@@ -263,8 +269,8 @@ void RollingDiceDemo::RollDice()
 
 	for(int i = 0; i < dice.size(); i++)
 	{
-		float xaxis = random.randomReal()*500;
-		float zaxis = random.randomReal()*500;
+		float xaxis = random.randomReal()*1000;
+		float zaxis = random.randomReal()*1000;
 		random = cyclone::Random(TimingData::get().getTime());
 		//Wake 'm up.
 		dice[i]->body->setAwake();
