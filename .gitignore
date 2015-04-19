@@ -12,3 +12,6 @@
 *.idb
 *.dll
 *.suo
+*.DS_Store
+*.xcodeproj/
+linux/
