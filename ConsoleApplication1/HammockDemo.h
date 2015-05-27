@@ -2,11 +2,11 @@
 #define HAMMOCK_INCLUDED
 
 #include <vector>
-#include <cyclone/cyclone.h>
-
-#include "../utils/app.h"
-#include "../utils/timing.h"
-#include "../utils/ogl_headers.h"
+#if defined(__APPLE__) || defined(MACOSX)
+#include "utilsIncl.h"
+#elif defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64)
+//#include "\utilsIncl.h"
+#endif
 
 #define PARTICLE_COUNT 8
 #define CABLE_COUNT 8

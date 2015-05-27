@@ -10,14 +10,8 @@
  * software licence.
  */
 
-// Include appropriate OpenGL headers.
-#include "ogl_headers.h"
-
-// Include the general application structure.
-#include "app.h"
-
-// Include the timing functions
-#include "timing.h"
+// Include all the utils stuff
+#include "utilsIncl.h"
 
 // Forward declaration of the function that will return the
 // application object for this particular demo. This should be

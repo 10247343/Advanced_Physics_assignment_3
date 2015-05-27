@@ -11,8 +11,7 @@
  */
 #pragma once
 #include <cstdlib>
-
-#include <cyclone/cyclone.h>
+#include "utilsIncl.h"
 
 /**
  * An application is the base class for all demonstration progams.
