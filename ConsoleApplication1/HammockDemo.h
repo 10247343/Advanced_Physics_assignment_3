@@ -1,6 +1,7 @@
 #ifndef HAMMOCK_INCLUDED
 #define HAMMOCK_INCLUDED
 
+#include <vector>
 #include <cyclone/cyclone.h>
 
 #include "../utils/app.h"
@@ -108,10 +109,14 @@ public:
 	void SetMassPosition(const Quadrilateral&);
 	void AddMassToParticlesIn(const Shape&);
 
+	/** update mass position with neighboors*/
+	void updateWithNeighboors();
+
 private:
 	cyclone::Vector3 massRelativePos;
 	cyclone::Vector3 massPos;
 	cyclone::Particle *particles;
+	cyclone::Vector3 *previousPos;
 	cyclone::ParticleRod *rods;
 	cyclone::ParticleWorld *world;
 	cyclone::ParticleCable *cables;

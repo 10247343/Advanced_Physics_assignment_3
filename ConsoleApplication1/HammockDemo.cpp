@@ -116,7 +116,7 @@ HammockDemo::HammockDemo()
 	world = new cyclone::ParticleWorld(40);
 	createHammock();
 
-	massRelativePos = cyclone::Vector3(5, 0, 1);
+	massRelativePos = cyclone::Vector3(5, 3, 1);
 	massPos = cyclone::Vector3(9, 0, 1);
 	intersectCounter = 0;
 }
@@ -135,6 +135,7 @@ void HammockDemo::createHammock()
 {
 	// creating all the points of the hammock
 	particles = new cyclone::Particle[PARTICLE_COUNT];
+	previousPos = new cyclone::Vector3[PARTICLE_COUNT];
 	for(int i = 0; i < PARTICLE_COUNT; i++)
 	{
 		particles[i].setPosition(cyclone::real(i/2)*4.0f+2.0f,
@@ -226,9 +227,14 @@ void HammockDemo::update()
 	float timepast = (float)TimingData::get().lastFrameDuration * 0.001f;
 	if (timepast <= 0.0f) return;
 
+	for(int i = 0; i < PARTICLE_COUNT; i++)
+	{
+		previousPos[i] = particles[i].getPosition();
+	}
 	world->runPhysics(timepast);
 	
 	//Check the quadrilateral the mass is on.
+	/*
 	Quadrilateral* colQuad(0x0);
 	for (int i = 0; i < NUMBER_OF_QUADRILATERALS; i++)
 	{
@@ -239,21 +245,24 @@ void HammockDemo::update()
 			break;
 		}
 	}
+	//*/
 	//Reset the mass for the particles.
 	for (int i = 0; i < PARTICLE_COUNT; i++)
 		particles[i].setMass(PARTICLE_MASS);
 
-	massPos = cyclone::Vector3();
+	//massPos = cyclone::Vector3();
 
 	//Check if the mass is actually on a quadrilateral.
-	if (colQuad)
+	//if (colQuad)
 	{
 		//printf("Intersection detected %d\n", ++intersectCounter);
 
 		//Set massPos.
-		SetMassPosition(*colQuad);
+		//SetMassPosition(*colQuad);
+		updateWithNeighboors();
+		massPos = massRelativePos;
 		//Now set the mass on the particles with the mass' current position.
-		AddMassToParticlesIn(*colQuad);
+		//AddMassToParticlesIn(*colQuad);
 	}
 
 	Application::update();
@@ -294,6 +303,7 @@ void HammockDemo::display()
         glVertex3f(point2.x, point2.y, point2.z);
     }
 	//*
+	// cables/shadow on the ground
 	glColor3f(0,0,1);
     for (int i = 0; i < CABLE_COUNT; i++)
     {
@@ -330,7 +340,8 @@ void HammockDemo::display()
 	glEnd();
 
 	//Draw mass object.
-	cyclone::Vector3 drawPos(massPos == cyclone::Vector3() ? massRelativePos : massPos);
+	cyclone::Vector3 drawPos(massPos);
+	//cyclone::Vector3 drawPos(massPos == cyclone::Vector3() ? massRelativePos : massPos);
 	glColor3f(0, 0, 1);
 	glPushMatrix();
 	glTranslatef(drawPos.x, drawPos.y, drawPos.z);
@@ -351,6 +362,42 @@ void HammockDemo::key(unsigned char key)
 	case 'a': massRelativePos.x -= 0.2f; break;
 	case 'd': massRelativePos.x += 0.2f; break;
     }
+}
+
+/* 
+* find closest particles and use them to update position
+*/
+void HammockDemo::updateWithNeighboors()
+{
+	std::vector<int> closest;
+	float dist = 0;
+	for(int i = 0; i < PARTICLE_COUNT; i++)
+	{
+		//printf("Subtract positions %d %f \n", i, (massRelativePos - particles[i].getPosition()) * (massRelativePos - particles[i].getPosition()));
+		if((massRelativePos - particles[i].getPosition()) * (massRelativePos - particles[i].getPosition()) <= 16)
+		{
+			closest.push_back(i);
+			dist += (massRelativePos - particles[i].getPosition()) * (massRelativePos - particles[i].getPosition());
+		}
+	}
+
+	if(closest.size() > 0){
+		cyclone::Vector3 move = cyclone::Vector3();
+		for(int j = 0; j < closest.size(); j++)
+		{
+			move += (particles[closest[j]].getPosition() - previousPos[closest[j]]);
+			float temp = PARTICLE_MASS;
+			float part = (massRelativePos - particles[closest[j]].getPosition()) * (massRelativePos - particles[closest[j]].getPosition())/dist;
+			//float percent = part/dist;
+			float add = MASSOBJECT_MASS * part;
+			temp += add;
+			particles[closest[j]].setMass(temp);
+			printf("mass: %d, %f \n", closest[j], particles[closest[j]].getMass());
+		}
+		move = cyclone::Vector3(move.x / closest.size(),move.y / closest.size(),move.z / closest.size());
+
+		massRelativePos += move;
+	}
 }
 
 void HammockDemo::SetMassPosition(const Quadrilateral& quadrilateral)
